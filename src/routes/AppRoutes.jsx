@@ -1,4 +1,4 @@
-import {   Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import AuthRoute from "./AuthRoute";
 import ProtectedRoute from "./ProtectedRoute";
 import ForgetPassword from "../pages/auth/ForgetPassword";
@@ -9,31 +9,33 @@ import ProjectList from "../pages/project/ProjectList";
 import UserList from "../pages/user/UserList";
 import CompanyList from "../pages/company/CompanyList";
 import NotFound from "../pages/errors/NotFound";
-
+import CompanyView from "@/pages/company/CompanyView";
 
 function AppRoutes() {
   return (
-
-      <Routes>
-        <Route path="/" element={<AuthRoute />}>
+    <Routes>
+      <Route path="/" element={<AuthRoute />}>
         <Route path="/" element={<SignIn />} />
-          <Route path="/forget-password" element={<ForgetPassword />} />
-          
-        </Route>
+        <Route path="/forget-password" element={<ForgetPassword />} />
+      </Route>
 
-        <Route path="/" element={<ProtectedRoute />}>
+      <Route path="/" element={<ProtectedRoute />}>
         <Route path="/home" element={<Dashboard />} />
 
-               <Route path="/company" element={<CompanyList />} />
-                <Route path="/user" element={<UserList />} />
-                <Route path="/project" element={<ProjectList />} />
-                <Route path="/task" element={<AllTaskList />} />
+        {/* company  */}
+        <Route path="/company" element={<CompanyList />} />
+        <Route path="/company/view/:id" element={<CompanyView />} />
 
-        </Route>
+        {/* user  */}
+        <Route path="/user" element={<UserList />} />
+        {/* project  */}
+        <Route path="/project" element={<ProjectList />} />
+        {/* task  */}
+        <Route path="/task" element={<AllTaskList />} />
+      </Route>
 
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }
 

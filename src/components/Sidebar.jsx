@@ -1,12 +1,7 @@
 import { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import {
-  FiHome,
-  FiFolder,
-  FiCheckSquare,
-  FiChevronDown,
-  FiChevronRight,
-} from "react-icons/fi";
+
+import { BookmarkCheck, Building2, ChevronDown, ChevronUp, FolderGit2, House, User } from "lucide-react";
 
 const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
   const [openSubmenu, setOpenSubmenu] = useState("");
@@ -16,27 +11,27 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
     {
       name: "Dashboard",
       path: "/home",
-      icon: FiHome,
+      icon: House,
     },
     {
       name: "Company",
       path: "/company",
-      icon: FiHome,
+      icon: Building2,
     },
     {
       name: "User",
       path: "/user",
-      icon: FiHome,
+      icon: User,
     },
     {
       name: "Project",
       path: "/project",
-      icon: FiHome,
+      icon: FolderGit2,
     },
     {
       name: "Task",
       path: "/task",
-      icon: FiHome,
+      icon: BookmarkCheck,
     },
     
   ];
@@ -70,7 +65,7 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
       )}
 
       <div
-        className={`fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white border-r border-gray-200 transition-all duration-300 ease-in-out
+        className={`fixed left-0 top-16 h-[calc(100vh-4rem)] bg-gray-50 border-r border-gray-200 transition-all duration-300 ease-in-out
         ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
         ${isCollapsed ? "lg:w-16" : "lg:w-64"}
         w-64 z-40 overflow-y-auto`}
@@ -89,9 +84,9 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
                       <div className="flex items-center justify-between flex-1">
                         <span className="text-sm font-medium">{item.name}</span>
                         {openSubmenu === item.name ? (
-                          <FiChevronDown className="w-4 h-4" />
+                          <ChevronUp className="w-4 h-4" />
                         ) : (
-                          <FiChevronRight className="w-4 h-4" />
+                          <ChevronDown className="w-4 h-4" />
                         )}
                       </div>
                     )}
@@ -105,7 +100,7 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
                   mb-1 flex items-center gap-3 p-2 rounded-lg transition-colors
                   ${
                     isActive
-                      ? "bg-accent-50 text-accent-600"
+                      ? "bg-black text-white"
                       : "text-gray-700 hover:bg-gray-100"
                   }
                 `}
