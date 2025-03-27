@@ -1,6 +1,5 @@
 import Layout from "@/components/Layout";
-
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
@@ -40,6 +39,9 @@ import { Base_Url } from "@/config/BaseUrl";
 import CreateTask from "./CreateTask";
 import Loader from "@/components/loader/Loader";
 import ErrorLoader from "@/components/loader/ErrorLoader";
+import EditTask from "./EditTask";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 
 const AllTaskList = () => {
   const {
@@ -61,14 +63,43 @@ const AllTaskList = () => {
     },
   });
 
-  // State for users table
+  // State for table
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
   const [rowSelection, setRowSelection] = useState({});
-  const navigate = useNavigate()
+  const [projectTypeFilter, setProjectTypeFilter] = useState("all");
+  const navigate = useNavigate();
 
-  // Define columns for the users table
+  
+  const projectTypesWithCounts = useMemo(() => {
+    if (!task) return [];
+
+    const typeCounts = task.reduce((acc, t) => {
+      acc[t.project_type] = (acc[t.project_type] || 0) + 1;
+      return acc;
+    }, {});
+
+    return Object.entries(typeCounts).map(([type, count]) => ({
+      type,
+      count,
+    }));
+  }, [task]);
+
+  
+  const totalTaskCount = useMemo(() => {
+    if (!task) return 0;
+    return task.length;
+  }, [task]);
+
+ 
+  const filteredTasks = useMemo(() => {
+    if (!task) return [];
+    if (projectTypeFilter === "all") return task;
+    return task.filter((t) => t.project_type === projectTypeFilter);
+  }, [task, projectTypeFilter]);
+
+ 
   const columns = [
     {
       accessorKey: "id",
@@ -87,6 +118,11 @@ const AllTaskList = () => {
         </Button>
       ),
       cell: ({ row }) => <div>{row.getValue("project_name")}</div>,
+    },
+    {
+      accessorKey: "project_type",
+      header: "Project Type",
+      cell: ({ row }) => <div>{row.getValue("project_type")}</div>,
     },
     {
       accessorKey: "task_title",
@@ -110,7 +146,7 @@ const AllTaskList = () => {
     },
     {
       accessorKey: "task_created",
-      header: "created",
+      header: "Created",
       cell: ({ row }) => <div>{row.getValue("task_created")}</div>,
     },
     {
@@ -128,7 +164,6 @@ const AllTaskList = () => {
       header: "Status",
       cell: ({ row }) => <div>{row.getValue("task_status")}</div>,
     },
-   
     {
       id: "actions",
       header: "Action",
@@ -137,183 +172,218 @@ const AllTaskList = () => {
 
         return (
           <div className="flex flex-row">
-            {/* <EditUserDialog onSuccess={refetch} userId={userId} /> */}
+            <EditTask onSuccess={refetch} taskId={taskId} />
           </div>
         );
       },
     },
   ];
 
-  // Create the table instance for users
- const table = useReactTable({
-     data: task || [],
-     columns,
-     onSortingChange: setSorting,
-     onColumnFiltersChange: setColumnFilters,
-     getCoreRowModel: getCoreRowModel(),
-     getPaginationRowModel: getPaginationRowModel(),
-     getSortedRowModel: getSortedRowModel(),
-     getFilteredRowModel: getFilteredRowModel(),
-     onColumnVisibilityChange: setColumnVisibility,
-     onRowSelectionChange: setRowSelection,
-     state: {
-       sorting,
-       columnFilters,
-       columnVisibility,
-       rowSelection,
-     },
-     initialState: {
-       pagination: {
-         pageSize: 7,
-       },
-     },
-   });
+  
+  const table = useReactTable({
+    data: filteredTasks || [],
+    columns,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+    },
+    initialState: {
+      pagination: {
+        pageSize: 7,
+      },
+    },
+  });
 
-  // Render loading state
+  
   if (isLoading) {
     return (
       <Layout>
-        <Loader/>
+        <Loader />
       </Layout>
     );
   }
 
-  // Render error state
+  
   if (isError) {
-    return ( 
+    return (
       <Layout>
-      <ErrorLoader onSuccess={refetch}/>
+        <ErrorLoader onSuccess={refetch} />
       </Layout>
     );
   }
-  return (
-   <Layout>
-   <div className="w-full p-4 ">
-                <div className="flex text-left text-2xl text-gray-800 font-[400]">
-                  Task List
-                </div>
-                {/* searching and column filter  */}
-                <div className="flex items-center py-4">
-                  <div className="relative w-72">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
-                    <Input
-                      placeholder="Search user..."
-                      value={table.getState().globalFilter || ""}
-                      onChange={(event) => table.setGlobalFilter(event.target.value)}
-                      className="pl-8 bg-gray-50 border-gray-200 focus:border-gray-300 focus:ring-gray-200"
-                    />
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="ml-auto">
-                        Columns <ChevronDown className="ml-2 h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      {table
-                        .getAllColumns()
-                        .filter((column) => column.getCanHide())
-                        .map((column) => {
-                          return (
-                            <DropdownMenuCheckboxItem
-                              key={column.id}
-                              className="capitalize"
-                              checked={column.getIsVisible()}
-                              onCheckedChange={(value) =>
-                                column.toggleVisibility(!!value)
-                              }
-                            >
-                              {column.id}
-                            </DropdownMenuCheckboxItem>
-                          );
-                        })}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-              
-                  {/* <CreateTask onSuccess={refetch} /> */}
-                </div>
-                {/* table  */}
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      {table.getHeaderGroups().map((headerGroup) => (
-                        <TableRow key={headerGroup.id}>
-                          {headerGroup.headers.map((header) => {
-                            return (
-                              <TableHead
-                                key={header.id}
-                               className=""
-                              >
-                                {header.isPlaceholder
-                                  ? null
-                                  : flexRender(
-                                    header.column.columnDef.header,
-                                    header.getContext()
-                                  )}
-                              </TableHead>
-                            );
-                          })}
-                        </TableRow>
-                      ))}
-                    </TableHeader>
-                    <TableBody>
-                      {table.getRowModel().rows?.length ? (
-                        table.getRowModel().rows.map((row) => (
-                          <TableRow
-                            key={row.id}
-                            data-state={row.getIsSelected() && "selected"}
-                          >
-                            {row.getVisibleCells().map((cell) => (
-                              <TableCell key={cell.id}>
-                                {flexRender(
-                                  cell.column.columnDef.cell,
-                                  cell.getContext()
-                                )}
-                              </TableCell>
-                            ))}
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell
-                            colSpan={columns.length}
-                            className="h-24 text-center"
-                          >
-                            No results.
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-                {/* row slection and pagintaion button  */}
-                <div className="flex items-center justify-end space-x-2 py-4">
-                  <div className="flex-1 text-sm text-muted-foreground">
-                    Total Tasks : &nbsp;
-                    {table.getFilteredRowModel().rows.length}
-                  </div>
-                  <div className="space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => table.previousPage()}
-                      disabled={!table.getCanPreviousPage()}
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => table.nextPage()}
-                      disabled={!table.getCanNextPage()}
-                    >
-                      Next
-                    </Button>
-                  </div>
-                </div>
-              </div>
-   </Layout>
-  )
-}
 
-export default AllTaskList
+  return (
+    <Layout>
+      <div className="w-full p-4">
+        <div className="flex text-left text-2xl text-gray-800 font-[400]">
+          Task List
+        </div>
+
+       
+
+        {/* Search and filter controls */}
+        <div className="flex flex-col md:flex-row items-center py-4 gap-4">
+          <div className="relative w-full md:w-72">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+            <Input
+              placeholder="Search tasks..."
+              value={table.getState().globalFilter || ""}
+              onChange={(event) => table.setGlobalFilter(event.target.value)}
+              className="pl-8 bg-gray-50 border-gray-200 focus:border-gray-300 focus:ring-gray-200"
+            />
+          </div>
+
+          <div className="flex gap-2 ml-auto">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="whitespace-nowrap">
+                  Columns <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) =>
+                          column.toggleVisibility(!!value)
+                        }
+                      >
+                        {column.id}
+                      </DropdownMenuCheckboxItem>
+                    );
+                  })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <CreateTask onSuccess={refetch} />
+          </div>
+        </div>
+        <div className=" mb-2 overflow-x-auto">
+          <Tabs
+            value={projectTypeFilter}
+            onValueChange={setProjectTypeFilter}
+            className="w-full"
+          >
+            <TabsList className="flex w-full justify-between md:justify-start gap-2">
+              <TabsTrigger
+                value="all"
+                className="flex-1 md:flex-initial whitespace-nowrap"
+              >
+                All Projects
+                <Badge variant="secondary" className="ml-2">
+                  {totalTaskCount}
+                </Badge>
+              </TabsTrigger>
+              {projectTypesWithCounts.map(({ type, count }) => (
+                <TabsTrigger
+                  key={type}
+                  value={type}
+                  className="flex-1 md:flex-initial whitespace-nowrap"
+                >
+                  {type}
+                  <Badge variant="secondary" className="ml-2">
+                    {count}
+                  </Badge>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        </div>
+        {/* Table */}
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id} className="bg-gray-50">
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No tasks found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Pagination controls */}
+        <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 py-4">
+          <div className="text-sm text-muted-foreground">
+            Showing {table.getFilteredRowModel().rows.length} task(s)
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
+};
+
+export default AllTaskList;

@@ -53,6 +53,7 @@ import { Base_Url } from '@/config/BaseUrl';
 import EditUserDialog from '@/components/editUserDialog/EditUserDialog';
 import ErrorLoader from '@/components/loader/ErrorLoader';
 import Loader from '@/components/loader/Loader';
+import moment from 'moment/moment';
 
 const CompanyView = () => {
     const { id } = useParams();
@@ -88,10 +89,11 @@ const CompanyView = () => {
       // Define columns for the users table
       const columns = [
         {
-          accessorKey: 'id',
-          header: 'ID',
-          cell: ({ row }) => <div>{row.getValue('id')}</div>,
+          accessorKey: "index",
+          header: "Sl No",
+          cell: ({ row }) => <div>{row.index + 1}</div>,
         },
+        
         {
           accessorKey: 'name',
           header: ({ column }) => (
@@ -110,6 +112,7 @@ const CompanyView = () => {
           header: 'Mobile',
           cell: ({ row }) => <div>{row.getValue('mobile')}</div>,
         },
+       
         {
           accessorKey: 'email',
           header: 'Email',
@@ -125,6 +128,17 @@ const CompanyView = () => {
             )
           },
         },
+         {
+              accessorKey: "last_login",
+              header: "Last Login",
+              cell: ({ row }) => {
+                const lastLogin= row.original.last_login
+        
+                return (
+                  <div>{lastLogin ? moment(lastLogin).format("DD-MM-YYYY") : "-"}</div>
+                )
+              },
+            },
         {
           accessorKey: 'status',
           header: 'Status',

@@ -1,26 +1,24 @@
-
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import mainLogo from "../../assets/kmrlive.png"; // Ensure the path is correct
-import { toast } from "sonner";
+
 import { Base_Url } from "../../config/BaseUrl";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 const ForgetPassword = () => {
-
   const [mobile, setMobile] = useState("");
   const navigate = useNavigate();
-
+  const { toast } = useToast();
   const onResetPassword = () => {
     const data = {
       username: username,
       mobile: mobile,
     };
 
-    
-    if (mobile !== "" ) {
+    if (mobile !== "") {
       axios({
         url: `${Base_Url}/api/panel-send-password`,
         method: "POST",
@@ -28,19 +26,32 @@ const ForgetPassword = () => {
       })
         .then((res) => {
           if (res.data.code == 200) {
-            toast.success("New Password Sent to your Email");
-           
-              navigate("/");
-          
+            toast({
+              title: "Success",
+              description: "New Password Sent to your Email",
+            });
+            navigate("/");
           } else {
-            toast.error("This email is not registered with us.");
+            toast({
+              title: "Error",
+              description: "This email is not registered with us.",
+              variant: "destructive",
+            });
           }
         })
         .catch((error) => {
-          toast.error("Email Not Sent.");
+          toast({
+            title: "Error",
+            description: "Email Not Sent.",
+            variant: "destructive",
+          });
         });
     } else {
-      toast.warn("Please enter a User Name & Email");
+      toast({
+        title: "Warning",
+        description: "Please enter a User Name & Email",
+        variant: "destructive",
+      });
     }
   };
 
@@ -49,7 +60,18 @@ const ForgetPassword = () => {
       <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
         {/* Logo */}
         <div className="flex justify-center mb-6">
-          <img src={mainLogo} alt="Main Logo" className=" h-16" />
+        <div className="font-semibold flex items-center space-x-2">
+            <div className="flex items-center">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-yellow-800">
+                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-bold text-yellow-900 leading-tight">Task Management</span>
+            </div>
+            </div>
         </div>
 
         {/* Title */}
@@ -59,12 +81,10 @@ const ForgetPassword = () => {
 
         {/* Form */}
         <div className="space-y-6">
-        
-
           {/* Email Input */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-             Mobile
+              Mobile
             </label>
             <input
               type="tel"
@@ -74,7 +94,6 @@ const ForgetPassword = () => {
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500 transition-colors placeholder-gray-400"
               placeholder="Enter mobile number"
               required
-
               onKeyDown={(e) => {
                 if (!/[0-9.]/.test(e.key) && e.key !== "Backspace") {
                   e.preventDefault();
@@ -106,7 +125,6 @@ const ForgetPassword = () => {
       </div>
 
       {/* Toast Container */}
-      
     </div>
   );
 };
