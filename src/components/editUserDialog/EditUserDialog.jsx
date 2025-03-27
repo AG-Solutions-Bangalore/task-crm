@@ -30,6 +30,7 @@ import { useState } from "react";
 import axios from "axios";
 import { Edit, Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import ButtonConfigColor from '../buttonComponent/ButtonConfig';
 
 const EditUserDialog = ({onSuccess,userId}) => {
      const [open, setOpen] = useState(false);
@@ -235,7 +236,7 @@ const EditUserDialog = ({onSuccess,userId}) => {
       </div>
       <DialogFooter>
    
-        <Button type="submit"   onClick={handleSubmit}
+        {/* <Button type="submit"   onClick={handleSubmit}
             disabled={isLoading || isFetching}>
           {isLoading ? (
               <>
@@ -245,7 +246,15 @@ const EditUserDialog = ({onSuccess,userId}) => {
             ) : (
               "Update User"
             )}
-        </Button>
+        </Button> */}
+        <ButtonConfigColor
+          loading={isLoading}
+            type="submit"
+            buttontype="update"
+            onClick={handleSubmit}
+            disabled={isLoading}
+            label="Update User"
+          />
       </DialogFooter>
     </DialogContent>
   </Dialog>

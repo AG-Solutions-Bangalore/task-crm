@@ -1,7 +1,6 @@
 import Layout from "@/components/Layout";
-
 import React, { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpDown, ChevronDown, Edit, Loader2, Search } from "lucide-react";
@@ -39,316 +38,299 @@ import {
 import { Base_Url } from "@/config/BaseUrl";
 import moment from "moment";
 import CreateProject from "./CreateProject";
-const ProjectList = () => {
-   const {
-      data: project,
-      isLoading,
-      isError,
-      refetch,
-    } = useQuery({
-      queryKey: ["projects"],
-      queryFn: async () => {
-        const token = localStorage.getItem("token");
-        const response = await axios.get(
-          `${Base_Url}/api/panel-fetch-project-list`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        return response.data.project;
-      },
-    });
-  
-    // State for users table
-    const [sorting, setSorting] = useState([]);
-    const [columnFilters, setColumnFilters] = useState([]);
-    const [columnVisibility, setColumnVisibility] = useState({});
-    const [rowSelection, setRowSelection] = useState({});
-    const [globalFilter, setGlobalFilter] = useState("");
-  
-    // Define columns for the users table
-    const columns = [
-      {
-        accessorKey: "id",
-        header: "ID",
-        cell: ({ row }) => <div>{row.getValue("id")}</div>,
-      },
-      {
-        accessorKey: "project_name",
-        header: ({ column }) => (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Project Name
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        ),
-        cell: ({ row }) => <div>{row.getValue("project_name")}</div>,
-      },
-      {
-        accessorKey: "project_desc",
-        header: "Desc",
-        cell: ({ row }) => <div>{row.getValue("project_desc")}</div>,
-      },
-      {
-        accessorKey: "project_due_date",
-        header: "Date",
-        cell: ({ row }) => {
-          const project_date = row.original.project_due_date
+import EditProject from "./EditProject";
+import ErrorLoader from "@/components/loader/ErrorLoader";
+import Loader from "@/components/loader/Loader";
 
-          return (
-            <div>{moment(project_date).format("DD-MM-YYYY")}</div>
-          )
-        },
+const ProjectList = () => {
+  const {
+    data: project,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ["projects"],
+    queryFn: async () => {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        `${Base_Url}/api/panel-fetch-project-list`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      return response.data.project;
+    },
+  });
+
+  // State for users table
+  const [sorting, setSorting] = useState([]);
+  const [columnFilters, setColumnFilters] = useState([]);
+  const [columnVisibility, setColumnVisibility] = useState({});
+  const [rowSelection, setRowSelection] = useState({});
+  const navigate = useNavigate();
+
+ 
+  const getProjectDetails = (project) => {
+    const types = project.project_types?.split(',') || [];
+    const dates = project.project_due_dates?.split(',') || [];
+    const subStatuses = project.projectSub_statuses?.split(',') || [];
+    
+    const maxLength = Math.max(types.length, dates.length, subStatuses.length);
+    const details = [];
+    
+    for (let i = 0; i < maxLength; i++) {
+      details.push({
+        type: types[i] || '-',
+        date: dates[i] ? moment(dates[i]).format("DD-MM-YYYY") : '-',
+        subStatus: subStatuses[i] || '-'
+      });
+    }
+    
+    return details;
+  };
+
+  // Define columns for the users table
+  const columns = [
+    {
+      accessorKey: "id",
+      header: "ID",
+      cell: ({ row }) => <div>{row.getValue("id")}</div>,
+    },
+    {
+      accessorKey: "project_name",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Project Name
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => <div>{row.getValue("project_name")}</div>,
+    },
+    {
+      accessorKey: "project_desc",
+      header: "Desc",
+      cell: ({ row }) => <div>{row.getValue("project_desc")}</div>,
+    },
+    {
+      accessorKey: "project_status",
+      header: "Status",
+      cell: ({ row }) => {
+        const status = row.getValue("project_status");
+        return (
+          <span
+            className={status === "Active" ? "text-green-600" : "text-red-600"}
+          >
+            {status}
+          </span>
+        );
       },
-      {
-        accessorKey: "email",
-        header: "Email",
-        cell: ({ row }) => <div>{row.getValue("email")}</div>,
+    },
+    {
+      accessorKey: "project_details",
+      header: "Project Details",
+      cell: ({ row }) => {
+        const details = getProjectDetails(row.original);
+        return (
+          <div className="space-y-1">
+            {details.map((detail, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <span className="font-medium">{detail.type}</span>
+                <span>-</span>
+                <span>{detail.date}</span>
+                <span>-</span>
+                <span className={detail.subStatus === "Confirmed" ? "text-green-600" : "text-red-600"}>
+                  {detail.subStatus}
+                </span>
+              </div>
+            ))}
+          </div>
+        );
       },
-      {
-        accessorKey: "project_website",
-        header: "P.Website",
-        cell: ({ row }) => <div>{row.getValue("project_website")}</div>,
+    },
+    {
+      id: "actions",
+      header: "Action",
+      cell: ({ row }) => {
+        const projectId = row.original.id;
+        return (
+          <div className="flex flex-row">
+            <EditProject projectId={projectId} onSuccess={refetch} />
+          </div>
+        );
       },
-      {
-        accessorKey: "project_webApp",
-        header: "P.WebApp",
-        cell: ({ row }) => <div>{row.getValue("project_webApp")}</div>,
+    },
+  ];
+
+  const table = useReactTable({
+    data: project || [],
+    columns,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+    },
+    initialState: {
+      pagination: {
+        pageSize: 7,
       },
-      {
-        accessorKey: "project_android_app",
-        header: "P.Android",
-        cell: ({ row }) => <div>{row.getValue("project_android_app")}</div>,
-      },
-      {
-        accessorKey: "project_ios_app",
-        header: "P.IOS",
-        cell: ({ row }) => <div>{row.getValue("project_ios_app")}</div>,
-      },
-      {
-        accessorKey: "project_marketing",
-        header: "P.M",
-        cell: ({ row }) => <div>{row.getValue("project_marketing")}</div>,
-      },
-      {
-        accessorKey: "project_status",
-        header: "Status",
-        cell: ({ row }) => {
-          const status = row.getValue("project_status");
-          return (
-            <span
-              className={status === "Active" ? "text-green-600" : "text-red-600"}
+    },
+  });
+
+  // Render loading state
+  if (isLoading) {
+    return (
+      <Layout>
+        <Loader/>
+      </Layout>
+    );
+  }
+
+  // Render error state
+  if (isError) {
+    return ( 
+      <Layout>
+        <ErrorLoader onSuccess={refetch}/>
+      </Layout>
+    );
+  }
+
+  return (
+    <Layout>
+      <div className="w-full p-4 ">
+        <div className="flex text-left text-2xl text-gray-800 font-[400]">
+          Projects List
+        </div>
+        {/* searching and column filter  */}
+        <div className="flex items-center py-4">
+          <div className="relative w-72">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+            <Input
+              placeholder="Search project..."
+              value={table.getState().globalFilter || ""}
+              onChange={(event) => table.setGlobalFilter(event.target.value)}
+              className="pl-8 bg-gray-50 border-gray-200 focus:border-gray-300 focus:ring-gray-200"
+            />
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="ml-auto">
+                Columns <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => {
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) =>
+                        column.toggleVisibility(!!value)
+                      }
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <CreateProject onSuccess={refetch} />
+        </div>
+        {/* table  */}
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id} className="">
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No results.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+        {/* row slection and pagintaion button  */}
+        <div className="flex items-center justify-end space-x-2 py-4">
+          <div className="flex-1 text-sm text-muted-foreground">
+            Total Projects : &nbsp;
+            {table.getFilteredRowModel().rows.length}
+          </div>
+          <div className="space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
             >
-              {status}
-            </span>
-          );
-        },
-      },
-      {
-        id: "actions",
-        header: "Action",
-        cell: ({ row }) => {
-          const projectId = row.original.id;
-  
-          return (
-            <div className="flex flex-row">
-              {/* <EditUserDialog onSuccess={refetch} userId={userId} /> */}
-            </div>
-          );
-        },
-      },
-    ];
-  
-    // Create the table instance for users
-    const table = useReactTable({
-      data: project || [],
-      columns,
-      onSortingChange: setSorting,
-      onColumnFiltersChange: setColumnFilters,
-      getCoreRowModel: getCoreRowModel(),
-      getPaginationRowModel: getPaginationRowModel(),
-      getSortedRowModel: getSortedRowModel(),
-      getFilteredRowModel: getFilteredRowModel(),
-      onColumnVisibilityChange: setColumnVisibility,
-      onRowSelectionChange: setRowSelection,
-      state: {
-        sorting,
-        columnFilters,
-        columnVisibility,
-        rowSelection,
-        globalFilter,
-      },
-      initialState: {
-        pagination: {
-          pageSize: 10,
-        },
-      },
-    });
-  
-    // Render loading state
-    if (isLoading) {
-      return (
-        <Layout>
-          <div className="flex justify-center items-center h-full">
-            <Button disabled>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Loading Project Data
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              Next
             </Button>
           </div>
-        </Layout>
-      );
-    }
-  
-    // Render error state
-    if (isError) {
-      return (
-        <Layout>
-          <Card className="w-full max-w-md mx-auto mt-10">
-            <CardHeader>
-              <CardTitle className="text-destructive">
-                Error Fetching Project Data
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Button onClick={() => refetch()} variant="outline">
-                Try Again
-              </Button>
-            </CardContent>
-          </Card>
-        </Layout>
-      );
-    }
-  
-  return (
-  <Layout>
-       <div className="w-full p-4 ">
-                <div className="flex text-left text-2xl text-gray-800 font-[400]">
-                  Projects List
-                </div>
-                {/* searching and column filter  */}
-                <div className="flex items-center py-4">
-                  <div className="relative w-72">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
-                    <Input
-                      placeholder="Search project..."
-                      value={table.getState().globalFilter || ""}
-                      onChange={(event) => table.setGlobalFilter(event.target.value)}
-                      className="pl-8 bg-gray-50 border-gray-200 focus:border-gray-300 focus:ring-gray-200"
-                    />
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="ml-auto">
-                        Columns <ChevronDown className="ml-2 h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      {table
-                        .getAllColumns()
-                        .filter((column) => column.getCanHide())
-                        .map((column) => {
-                          return (
-                            <DropdownMenuCheckboxItem
-                              key={column.id}
-                              className="capitalize"
-                              checked={column.getIsVisible()}
-                              onCheckedChange={(value) =>
-                                column.toggleVisibility(!!value)
-                              }
-                            >
-                              {column.id}
-                            </DropdownMenuCheckboxItem>
-                          );
-                        })}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-              
-                  <CreateProject onSuccess={refetch} />
-                </div>
-                {/* table  */}
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      {table.getHeaderGroups().map((headerGroup) => (
-                        <TableRow key={headerGroup.id}>
-                          {headerGroup.headers.map((header) => {
-                            return (
-                              <TableHead
-                                key={header.id}
-                               className=""
-                              >
-                                {header.isPlaceholder
-                                  ? null
-                                  : flexRender(
-                                    header.column.columnDef.header,
-                                    header.getContext()
-                                  )}
-                              </TableHead>
-                            );
-                          })}
-                        </TableRow>
-                      ))}
-                    </TableHeader>
-                    <TableBody>
-                      {table.getRowModel().rows?.length ? (
-                        table.getRowModel().rows.map((row) => (
-                          <TableRow
-                            key={row.id}
-                            data-state={row.getIsSelected() && "selected"}
-                          >
-                            {row.getVisibleCells().map((cell) => (
-                              <TableCell key={cell.id}>
-                                {flexRender(
-                                  cell.column.columnDef.cell,
-                                  cell.getContext()
-                                )}
-                              </TableCell>
-                            ))}
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell
-                            colSpan={columns.length}
-                            className="h-24 text-center"
-                          >
-                            No results.
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-                {/* row slection and pagintaion button  */}
-                <div className="flex items-center justify-end space-x-2 py-4">
-                  <div className="flex-1 text-sm text-muted-foreground">
-                    Total Projects : &nbsp;
-                    {table.getFilteredRowModel().rows.length}
-                  </div>
-                  <div className="space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => table.previousPage()}
-                      disabled={!table.getCanPreviousPage()}
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => table.nextPage()}
-                      disabled={!table.getCanNextPage()}
-                    >
-                      Next
-                    </Button>
-                  </div>
-                </div>
-              </div>
-  </Layout>
-  )
-}
+        </div>
+      </div>
+    </Layout>
+  );
+};
 
-export default ProjectList
+export default ProjectList;

@@ -1,7 +1,7 @@
 import Layout from "@/components/Layout";
 
 import React, { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpDown, ChevronDown, Edit, Loader2, Search } from "lucide-react";
@@ -39,6 +39,8 @@ import {
 import { Base_Url } from "@/config/BaseUrl";
 import CreateUserDialog from "@/components/createUserDialog/CreateUserDialog";
 import EditUserDialog from "@/components/editUserDialog/EditUserDialog";
+import ErrorLoader from "@/components/loader/ErrorLoader";
+import Loader from "@/components/loader/Loader";
 
 const UserList = () => {
   const {
@@ -65,7 +67,7 @@ const UserList = () => {
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
   const [rowSelection, setRowSelection] = useState({});
-  const [globalFilter, setGlobalFilter] = useState("");
+  const navigate = useNavigate()
 
   // Define columns for the users table
   const columns = [
@@ -98,6 +100,16 @@ const UserList = () => {
       cell: ({ row }) => <div>{row.getValue("email")}</div>,
     },
     {
+      accessorKey: "user_type",
+      header: "User Type",
+      cell: ({ row }) => {
+        const userType = row.original.user_type
+        return (
+          <div>{userType === 1 ? "User" : "Admin"}</div>
+        )
+      },
+    },
+    {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => {
@@ -127,64 +139,48 @@ const UserList = () => {
   ];
 
   // Create the table instance for users
-  const table = useReactTable({
-    data: user || [],
-    columns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-      globalFilter,
-    },
-    initialState: {
-      pagination: {
-        pageSize: 10,
-      },
-    },
-  });
+ const table = useReactTable({
+     data: user || [],
+     columns,
+     onSortingChange: setSorting,
+     onColumnFiltersChange: setColumnFilters,
+     getCoreRowModel: getCoreRowModel(),
+     getPaginationRowModel: getPaginationRowModel(),
+     getSortedRowModel: getSortedRowModel(),
+     getFilteredRowModel: getFilteredRowModel(),
+     onColumnVisibilityChange: setColumnVisibility,
+     onRowSelectionChange: setRowSelection,
+     state: {
+       sorting,
+       columnFilters,
+       columnVisibility,
+       rowSelection,
+     },
+     initialState: {
+       pagination: {
+         pageSize: 7,
+       },
+     },
+   });
 
   // Render loading state
-  if (isLoading) {
-    return (
-      <Layout>
-        <div className="flex justify-center items-center h-full">
-          <Button disabled>
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Loading User Data
-          </Button>
-        </div>
-      </Layout>
-    );
-  }
-
-  // Render error state
-  if (isError) {
-    return (
-      <Layout>
-        <Card className="w-full max-w-md mx-auto mt-10">
-          <CardHeader>
-            <CardTitle className="text-destructive">
-              Error Fetching User Data
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Button onClick={() => refetch()} variant="outline">
-              Try Again
-            </Button>
-          </CardContent>
-        </Card>
-      </Layout>
-    );
-  }
+    // Render loading state
+    if (isLoading) {
+      return (
+        <Layout>
+          <Loader/>
+        </Layout>
+      );
+    }
+  
+    // Render error state
+    if (isError) {
+      return ( 
+        <Layout>
+        <ErrorLoader onSuccess={refetch}/>
+        </Layout>
+      );
+    }
 
   return (
     <Layout>
