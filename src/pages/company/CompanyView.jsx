@@ -43,7 +43,8 @@ import { useParams } from 'react-router-dom';
 
 import CreateUserDialog from '@/components/createUserDialog/CreateUserDialog';
 import EditUserDialog from '@/components/editUserDialog/EditUserDialog';
-import { Base_Url } from '@/config/BaseUrl';
+import ErrorLoader from '@/components/loader/ErrorLoader';
+import Loader from '@/components/loader/Loader';
 
 const CompanyView = () => {
     const { id } = useParams();
@@ -107,6 +108,16 @@ const CompanyView = () => {
           cell: ({ row }) => <div>{row.getValue('email')}</div>,
         },
         {
+          accessorKey: "user_type",
+          header: "User Type",
+          cell: ({ row }) => {
+            const userType = row.original.user_type
+            return (
+              <div>{userType === 1 ? "User" : "Admin"}</div>
+            )
+          },
+        },
+        {
           accessorKey: 'status',
           header: 'Status',
           cell: ({ row }) => {
@@ -163,38 +174,23 @@ const CompanyView = () => {
     
      
       // Render loading state
-      if (isLoading) {
-        return (
-          <Layout>
-            <div className="flex justify-center items-center h-full">
-              <Button disabled>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Loading Company Data
-              </Button>
-            </div>
-          </Layout>
-        );
-      }
-    
-      // Render error state
-      if (isError) {
-        return (
-          <Layout>
-            <Card className="w-full max-w-md mx-auto mt-10">
-              <CardHeader>
-                <CardTitle className="text-destructive">
-                  Error Fetching Company Data
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Button onClick={() => refetch()} variant="outline">
-                  Try Again
-                </Button>
-              </CardContent>
-            </Card>
-          </Layout>
-        );
-      }
+      // Render loading state
+  if (isLoading) {
+    return (
+      <Layout>
+        <Loader/>
+      </Layout>
+    );
+  }
+
+  // Render error state
+  if (isError) {
+    return ( 
+      <Layout>
+      <ErrorLoader onSuccess={refetch}/>
+      </Layout>
+    );
+  }
     
       const company = data?.company;
     

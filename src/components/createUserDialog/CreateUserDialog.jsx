@@ -18,6 +18,7 @@ import { Loader2, SquarePlus } from "lucide-react";
 
 import { useLocation } from "react-router-dom";
 import { Base_Url } from "@/config/BaseUrl";
+import ButtonConfigColor from "../buttonComponent/ButtonConfig";
 
 const CreateUserDialog = ({onSuccess}) => {
      const [open, setOpen] = useState(false);
@@ -169,10 +170,10 @@ const CreateUserDialog = ({onSuccess}) => {
             </div>
     
             <DialogFooter>
-              <Button
+              {/* <Button
                 onClick={handleSubmit}
                 disabled={isLoading}
-                // className="bg-yellow-500 text-black hover:bg-yellow-100"
+                
               >
                 {isLoading ? (
                   <>
@@ -182,7 +183,16 @@ const CreateUserDialog = ({onSuccess}) => {
                 ) : (
                   "Create User"
                 )}
-              </Button>
+              </Button> */}
+
+              <ButtonConfigColor
+          loading={isLoading}
+            type="submit"
+            buttontype="submit"
+            onClick={handleSubmit}
+            disabled={isLoading}
+            label="Create User"
+          />
             </DialogFooter>
           </DialogContent>
         </Dialog>

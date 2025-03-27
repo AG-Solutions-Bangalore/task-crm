@@ -45,7 +45,9 @@ import {
 import { useNavigate } from "react-router-dom";
 
 import Layout from "@/components/Layout";
-import { useToast } from "@/hooks/use-toast";
+import CompanyView from "./CompanyView";
+import Loader from "@/components/loader/Loader";
+import ErrorLoader from "@/components/loader/ErrorLoader";
 
 const CompanyList = () => {
       const { toast } = useToast();
@@ -86,19 +88,7 @@ const CompanyList = () => {
             cell: ({ row }) => <div>{row.getValue("company_name")}</div>,
           },
       
-          {
-            accessorKey: "contract_no",
-            header: ({ column }) => (
-              <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-              >
-                Contract No
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-              </Button>
-            ),
-            cell: ({ row }) => <div>{row.getValue("contract_no")}</div>,
-          },
+      
           {
             accessorKey: "company_mobile",
             header: "Mobile",
@@ -188,38 +178,23 @@ const CompanyList = () => {
           },
         });
       
-        if (isLoading) {
-            return (
-             <Layout>
-                <div className="flex justify-center items-center h-full">
-                  <Button disabled>
-                    <Loader2 className=" h-4 w-4 animate-spin" />
-                    Loading Company List Data
-                  </Button>
-                </div>
-                </Layout>
-            );
-          }
-        
-      
-          if (isError) {
-            return (
-              <Layout>
-                <Card className="w-full max-w-md mx-auto mt-10">
-                  <CardHeader>
-                    <CardTitle className="text-destructive">
-                      Error Fetching Company List Data
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Button onClick={() => refetch()} variant="outline">
-                      Try Again
-                    </Button>
-                  </CardContent>
-                </Card>
-                </Layout>
-            );
-          }
+          // Render loading state
+  if (isLoading) {
+    return (
+      <Layout>
+        <Loader/>
+      </Layout>
+    );
+  }
+
+  // Render error state
+  if (isError) {
+    return ( 
+      <Layout>
+      <ErrorLoader onSuccess={refetch}/>
+      </Layout>
+    );
+  }
     return (
         <Layout>
             <div className="w-full p-4 ">
