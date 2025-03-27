@@ -41,6 +41,7 @@ import CreateUserDialog from "@/components/createUserDialog/CreateUserDialog";
 import EditUserDialog from "@/components/editUserDialog/EditUserDialog";
 import ErrorLoader from "@/components/loader/ErrorLoader";
 import Loader from "@/components/loader/Loader";
+import moment from "moment";
 
 const UserList = () => {
   const {
@@ -72,10 +73,11 @@ const UserList = () => {
   // Define columns for the users table
   const columns = [
     {
-      accessorKey: "id",
-      header: "ID",
-      cell: ({ row }) => <div>{row.getValue("id")}</div>,
+      accessorKey: "index",
+      header: "Sl No",
+      cell: ({ row }) => <div>{row.index + 1}</div>,
     },
+    
     {
       accessorKey: "name",
       header: ({ column }) => (
@@ -100,15 +102,17 @@ const UserList = () => {
       cell: ({ row }) => <div>{row.getValue("email")}</div>,
     },
     {
-      accessorKey: "user_type",
-      header: "User Type",
+      accessorKey: "last_login",
+      header: "Last Login",
       cell: ({ row }) => {
-        const userType = row.original.user_type
+        const lastLogin= row.original.last_login
+
         return (
-          <div>{userType === 1 ? "User" : "Admin"}</div>
+          <div>{lastLogin ? moment(lastLogin).format("DD-MM-YYYY") : "-"}</div>
         )
       },
     },
+   
     {
       accessorKey: "status",
       header: "Status",

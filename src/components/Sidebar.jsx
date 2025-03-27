@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-
 import {
   BookmarkCheck,
   Building2,
@@ -11,12 +10,30 @@ import {
   House,
   User,
 } from "lucide-react";
+import moment from "moment";
 
 const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
   const [openSubmenu, setOpenSubmenu] = useState("");
+  const [userType, setUserType] = useState(null);
+  const [userInfo, setUserInfo] = useState({
+    name: "",
+    lastLogin: "",
+  });
   const location = useLocation();
 
-  const menuItems = [
+  useEffect(() => {
+    const storedUserType = localStorage.getItem("userType");
+    const storedName = localStorage.getItem("name");
+    const storedLastLogin = localStorage.getItem("last_login");
+
+    setUserType(storedUserType);
+    setUserInfo({
+      name: storedName || "",
+      lastLogin: storedLastLogin || "",
+    });
+  }, []);
+
+  const allMenuItems = [
     {
       name: "Dashboard",
       path: "/home",
@@ -53,6 +70,12 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
       ],
     },
   ];
+
+  const menuItems =
+    userType === "1"
+      ? allMenuItems.filter((item) => item.name === "Task")
+      : allMenuItems;
+
   useEffect(() => {
     const currentSubmenu = menuItems.find((item) =>
       item.subitems?.some((subitem) => subitem.path === location.pathname)
@@ -73,6 +96,16 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
     }
   };
 
+  const formatLastLogin = (dateString) => {
+    if (!dateString) return "Never logged in";
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString();
+    } catch {
+      return dateString;
+    }
+  };
+
   return (
     <>
       {isOpen && (
@@ -86,9 +119,9 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
         className={`fixed left-0 top-16 h-[calc(100vh-4rem)] bg-gray-50 border-r border-gray-200 transition-all duration-300 ease-in-out
         ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
         ${isCollapsed ? "lg:w-16" : "lg:w-64"}
-        w-64 z-40 overflow-y-auto`}
+        w-64 z-40 overflow-y-auto flex flex-col`}
       >
-        <div className="p-4">
+        <div className="p-4 flex-1">
           {menuItems.map((item) => (
             <div key={item.name}>
               {item.subitems ? (
@@ -154,6 +187,18 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
             </div>
           ))}
         </div>
+
+        {/* User info section at the bottom */}
+        {!isCollapsed && (
+          <div className="p-4 border-t border-gray-200 flex justify-center capitalize">
+            <div className="text-md font-medium text-gray-900">
+              {userInfo.name}
+            </div>
+            {/* <div className="text-xs text-gray-500">
+              Last login: {moment(userInfo.lastLogin).format("DD-MM-YYYY")}
+            </div> */}
+          </div>
+        )}
       </div>
     </>
   );
