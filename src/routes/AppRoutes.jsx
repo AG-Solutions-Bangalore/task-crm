@@ -10,6 +10,9 @@ import UserList from "../pages/user/UserList";
 import CompanyList from "../pages/company/CompanyList";
 import NotFound from "../pages/errors/NotFound";
 import CompanyView from "@/pages/company/CompanyView";
+import ProjectReport from "@/pages/report/ProjectReport/ProjectReport";
+import UserReport from "@/pages/report/UserReport/UserReport";
+import ProjectTask from "@/pages/report/ProjectTask/ProjectTask";
 
 function AppRoutes() {
   return (
@@ -32,6 +35,10 @@ function AppRoutes() {
         <Route path="/project" element={<ProjectList />} />
         {/* task  */}
         <Route path="/task" element={<AllTaskList />} />
+        {/* //Reports */}
+        <Route path="/report/project" element={<ProjectReport />} />
+        <Route path="/report/task" element={<UserReport />} />
+        <Route path="/report/project/task" element={<ProjectTask />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

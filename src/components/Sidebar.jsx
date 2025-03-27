@@ -1,11 +1,20 @@
 import { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 
-import { BookmarkCheck, Building2, ChevronDown, ChevronUp, FolderGit2, House, User } from "lucide-react";
+import {
+  BookmarkCheck,
+  Building2,
+  ChevronDown,
+  ChevronUp,
+  Folder,
+  FolderGit2,
+  House,
+  User,
+} from "lucide-react";
 
 const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
   const [openSubmenu, setOpenSubmenu] = useState("");
-  const location = useLocation(); 
+  const location = useLocation();
 
   const menuItems = [
     {
@@ -33,12 +42,16 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
       path: "/task",
       icon: BookmarkCheck,
     },
+
     {
       name: "Report",
-      path: "/report",
-      icon: BookmarkCheck,
+      icon: Folder,
+      subitems: [
+        { name: "Project", path: "/report/project" },
+        { name: "Task", path: "/report/task" },
+        { name: "Project Task", path: "/report/project/task" },
+      ],
     },
-    
   ];
   useEffect(() => {
     const currentSubmenu = menuItems.find((item) =>
