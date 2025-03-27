@@ -1,12 +1,12 @@
 
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
-import mainLogo from "../../assets/kmrlive.png"; // Ensure the path is correct
-import { toast } from "sonner";
-import { Base_Url } from "../../config/BaseUrl";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import mainLogo from "../../assets/kmrlive.png"; // Ensure the path is correct
+import { Base_Url } from "../../config/BaseUrl";
 
 const ForgetPassword = () => {
 

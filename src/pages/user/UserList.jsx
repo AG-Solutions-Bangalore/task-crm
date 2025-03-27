@@ -28,6 +28,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Base_Url } from "@/config/BaseUrl";
+import { useQuery } from "@tanstack/react-query";
 import {
   flexRender,
   getCoreRowModel,
@@ -36,11 +38,17 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+<<<<<<< HEAD
+import axios from "axios";
+import { ArrowUpDown, ChevronDown, Loader2, Search } from "lucide-react";
+import { useState } from "react";
+=======
 import { Base_Url } from "@/config/BaseUrl";
 import CreateUserDialog from "@/components/createUserDialog/CreateUserDialog";
 import EditUserDialog from "@/components/editUserDialog/EditUserDialog";
 import ErrorLoader from "@/components/loader/ErrorLoader";
 import Loader from "@/components/loader/Loader";
+>>>>>>> 5c421563ea55967807d0b0abb70025809034b63f
 
 const UserList = () => {
   const {
