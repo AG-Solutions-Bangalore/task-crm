@@ -97,6 +97,11 @@ const ProjectList = () => {
       cell: ({ row }) => <div>{row.getValue("id")}</div>,
     },
     {
+      accessorKey: 'client_name',
+      header: 'Client Name',
+      cell: ({ row }) => <div>{row.getValue('client_name')}</div>,
+    },
+    {
       accessorKey: "project_name",
       header: ({ column }) => (
         <Button
