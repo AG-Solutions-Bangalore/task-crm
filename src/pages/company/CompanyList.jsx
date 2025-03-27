@@ -1,29 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import {
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import {
-  ArrowUpDown,
-  ChevronDown,
-  Edit,
-  Edit2,
-  Eye,
-  Loader2,
-  Search,
-  SquarePlus,
-  Trash,
-  UserPen,
-  View,
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -45,14 +23,29 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Base_Url } from "@/config/BaseUrl";
+import { useQuery } from "@tanstack/react-query";
+import {
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import axios from "axios";
+import {
+  ArrowUpDown,
+  ChevronDown,
+  Eye,
+  Loader2,
+  Search
+} from "lucide-react";
 
 import { useNavigate } from "react-router-dom";
 
-import { useToast } from "@/hooks/use-toast";
 import Layout from "@/components/Layout";
-import CompanyView from "./CompanyView";
+import { useToast } from "@/hooks/use-toast";
 
 const CompanyList = () => {
       const { toast } = useToast();
