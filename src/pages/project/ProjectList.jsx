@@ -1,17 +1,8 @@
+import useApiToken from "@/components/common/UseToken";
 import Layout from "@/components/Layout";
-import React, { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
-import { useQuery } from "@tanstack/react-query";
-import { ArrowUpDown, ChevronDown, Edit, Loader2, Search } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import ErrorLoader from "@/components/loader/ErrorLoader";
+import Loader from "@/components/loader/Loader";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -27,6 +18,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Base_Url } from "@/config/BaseUrl";
+import { useQuery } from "@tanstack/react-query";
 import {
   flexRender,
   getCoreRowModel,
@@ -35,14 +28,17 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Base_Url } from "@/config/BaseUrl";
+import axios from "axios";
+import { ArrowUpDown, ChevronDown, Search } from "lucide-react";
 import moment from "moment";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import CreateProject from "./CreateProject";
 import EditProject from "./EditProject";
-import ErrorLoader from "@/components/loader/ErrorLoader";
-import Loader from "@/components/loader/Loader";
 
 const ProjectList = () => {
+  const token = useApiToken();
+
   const {
     data: project,
     isLoading,
@@ -51,7 +47,6 @@ const ProjectList = () => {
   } = useQuery({
     queryKey: ["projects"],
     queryFn: async () => {
-      const token = localStorage.getItem("token");
       const response = await axios.get(
         `${Base_Url}/api/panel-fetch-project-list`,
         {
@@ -69,37 +64,43 @@ const ProjectList = () => {
   const [rowSelection, setRowSelection] = useState({});
   const navigate = useNavigate();
 
- 
   const getProjectDetails = (project) => {
-    const types = project.project_types?.split(',') || [];
-    const dates = project.project_due_dates?.split(',') || [];
-    const subStatuses = project.projectSub_statuses?.split(',') || [];
-    
+    const types = project.project_types?.split(",") || [];
+    const dates = project.project_due_dates?.split(",") || [];
+    const subStatuses = project.projectSub_statuses?.split(",") || [];
+
     const maxLength = Math.max(types.length, dates.length, subStatuses.length);
     const details = [];
-    
+
     for (let i = 0; i < maxLength; i++) {
       details.push({
-        type: types[i] || '-',
-        date: dates[i] ? moment(dates[i]).format("DD-MM-YYYY") : '-',
-        subStatus: subStatuses[i] || '-'
+        type: types[i] || "-",
+        date: dates[i] ? moment(dates[i]).format("DD-MM-YYYY") : "-",
+        subStatus: subStatuses[i] || "-",
       });
     }
-    
+
     return details;
   };
+  const statusColors = {
+    Pending: "bg-yellow-500 text-white", // Yellow
+    Confirmed: "bg-blue-500 text-white", // Blue
+    "On Progress": "bg-cyan-500 text-white", // Light Blue
+    Cancel: "bg-red-500 text-white", // Red
+    Completed: "bg-green-500 text-white", // Green
+    default: "bg-gray-400 text-white", // Default Gray
+  };
 
-  // Define columns for the users table
   const columns = [
     {
-      accessorKey: "id",
-      header: "ID",
-      cell: ({ row }) => <div>{row.getValue("id")}</div>,
+      accessorKey: "index",
+      header: "Sl No",
+      cell: ({ row }) => <div>{row.index + 1}</div>,
     },
     {
-      accessorKey: 'client_name',
-      header: 'Client Name',
-      cell: ({ row }) => <div>{row.getValue('client_name')}</div>,
+      accessorKey: "client_name",
+      header: "Client Name",
+      cell: ({ row }) => <div>{row.getValue("client_name")}</div>,
     },
     {
       accessorKey: "project_name",
@@ -124,15 +125,19 @@ const ProjectList = () => {
       header: "Status",
       cell: ({ row }) => {
         const status = row.getValue("project_status");
+
         return (
           <span
-            className={status === "Active" ? "text-green-600" : "text-red-600"}
+            className={`px-2 py-1 text-sm  rounded-md ${
+              statusColors[status] || statusColors.default
+            }`}
           >
             {status}
           </span>
         );
       },
     },
+
     {
       accessorKey: "project_details",
       header: "Project Details",
@@ -146,7 +151,13 @@ const ProjectList = () => {
                 <span>-</span>
                 <span>{detail.date}</span>
                 <span>-</span>
-                <span className={detail.subStatus === "Confirmed" ? "text-green-600" : "text-red-600"}>
+                <span
+                  className={
+                    detail.subStatus === "Confirmed"
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }
+                >
                   {detail.subStatus}
                 </span>
               </div>
@@ -197,16 +208,16 @@ const ProjectList = () => {
   if (isLoading) {
     return (
       <Layout>
-        <Loader/>
+        <Loader data="Project" />
       </Layout>
     );
   }
 
   // Render error state
   if (isError) {
-    return ( 
+    return (
       <Layout>
-        <ErrorLoader onSuccess={refetch}/>
+        <ErrorLoader onSuccess={refetch} />
       </Layout>
     );
   }

@@ -1,28 +1,5 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import {
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import {
-  ArrowUpDown,
-  ChevronDown,
-  Edit,
-  Edit2,
-  Eye,
-  Loader2,
-  Search,
-  SquarePlus,
-  Trash,
-  UserPen,
-  View,
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -45,166 +22,179 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Base_Url } from "@/config/BaseUrl";
+import { useQuery } from "@tanstack/react-query";
+import {
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import axios from "axios";
+import { ChevronDown, Eye, Search } from "lucide-react";
 
 import { useNavigate } from "react-router-dom";
 
-import { useToast } from "@/hooks/use-toast";
+import useApiToken from "@/components/common/UseToken";
 import Layout from "@/components/Layout";
-import CompanyView from "./CompanyView";
-import Loader from "@/components/loader/Loader";
 import ErrorLoader from "@/components/loader/ErrorLoader";
+import Loader from "@/components/loader/Loader";
+import { encryptId } from "@/components/common/EncryptionDecryption";
 
 const CompanyList = () => {
-      const { toast } = useToast();
-    const {
-        data: company,
-        isLoading,
-        isError,
-        refetch,
-      } = useQuery({
-        queryKey: ["company"],
-        queryFn: async () => {
-          const token = localStorage.getItem("token");
-          const response = await axios.get(
-            `${Base_Url}/api/panel-fetch-company-list`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
-          return response.data.company;
-        },
-      });
-       const [sorting, setSorting] = useState([]);
-        const [columnFilters, setColumnFilters] = useState([]);
-        const [columnVisibility, setColumnVisibility] = useState({});
-        const [rowSelection, setRowSelection] = useState({});
-        const navigate = useNavigate();
-      
-        // Define columns for the table
-        const columns = [
-          {
-            accessorKey: "company_type",
-            header: "Company Type",
-            cell: ({ row }) => <div>{row.getValue("company_type")}</div>,
-          },
-          {
-            accessorKey: "company_name",
-            header: "Company",
-            cell: ({ row }) => <div>{row.getValue("company_name")}</div>,
-          },
-      
-      
-          {
-            accessorKey: "company_mobile",
-            header: "Mobile",
-            cell: ({ row }) => <div>{row.getValue("company_mobile")}</div>,
-          },
-          {
-            accessorKey: "company_email",
-            header: "Email",
-            cell: ({ row }) => <div>{row.getValue("company_email")}</div>,
-          },
-          {
-            accessorKey: "company_status",
-            header: "Status",
-            cell: ({ row }) => {
-              const status = row.getValue("company_status");
-      
-              const statusColors = {
-     
-                Active: "bg-green-100 text-green-800",
-                Inactive: "bg-red-100 text-red-800",
-              };
-      
-              return (
-                <span
-                  className={`px-2 py-1 rounded text-xs ${statusColors[status] || "bg-gray-100 text-gray-800"
-                    }`}
-                >
-                  {status}
-                </span>
-              );
-            },
-          },
-      
-          {
-            id: "actions",
-            header: "Action",
-            cell: ({ row }) => {
-              const companyId = row.original.id;
+  const token = useApiToken();
 
-      
-              return (
-                <div className="flex flex-row">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => navigate(`/company/view/${companyId}`)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
+  const {
+    data: company,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ["company", token],
+    queryFn: async () => {
+      const response = await axios.get(
+        `${Base_Url}/api/panel-fetch-company-list`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      return response.data.company;
+    },
+  });
+  const [sorting, setSorting] = useState([]);
+  const [columnFilters, setColumnFilters] = useState([]);
+  const [columnVisibility, setColumnVisibility] = useState({});
+  const [rowSelection, setRowSelection] = useState({});
+  const navigate = useNavigate();
 
-                      </TooltipTrigger>
-                      <TooltipContent>View Company</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                
-                </div>
-              );
-            },
-          },
-        ];
-      
-        // Create the table instance
-        const table = useReactTable({
-          data: company || [],
-          columns,
-          onSortingChange: setSorting,
-          onColumnFiltersChange: setColumnFilters,
-          getCoreRowModel: getCoreRowModel(),
-          getPaginationRowModel: getPaginationRowModel(),
-          getSortedRowModel: getSortedRowModel(),
-          getFilteredRowModel: getFilteredRowModel(),
-          onColumnVisibilityChange: setColumnVisibility,
-          onRowSelectionChange: setRowSelection,
-          state: {
-            sorting,
-            columnFilters,
-            columnVisibility,
-            rowSelection,
-          },
-          initialState: {
-            pagination: {
-              pageSize: 7,
-            },
-          },
-        });
-      
-          // Render loading state
+  // Define columns for the table
+  const columns = [
+    {
+      accessorKey: "company_type",
+      header: "Company Type",
+      cell: ({ row }) => <div>{row.getValue("company_type")}</div>,
+    },
+    {
+      accessorKey: "company_name",
+      header: "Company",
+      cell: ({ row }) => <div>{row.getValue("company_name")}</div>,
+    },
+
+    {
+      accessorKey: "company_mobile",
+      header: "Mobile",
+      cell: ({ row }) => <div>{row.getValue("company_mobile")}</div>,
+    },
+    {
+      accessorKey: "company_email",
+      header: "Email",
+      cell: ({ row }) => <div>{row.getValue("company_email")}</div>,
+    },
+    {
+      accessorKey: "company_status",
+      header: "Status",
+      cell: ({ row }) => {
+        const status = row.getValue("company_status");
+
+        const statusColors = {
+          Active: "bg-green-100 text-green-800",
+          Inactive: "bg-red-100 text-red-800",
+        };
+
+        return (
+          <span
+            className={`px-2 py-1 rounded text-xs ${
+              statusColors[status] || "bg-gray-100 text-gray-800"
+            }`}
+          >
+            {status}
+          </span>
+        );
+      },
+    },
+
+    {
+      id: "actions",
+      header: "Action",
+      cell: ({ row }) => {
+        const companyId = row.original.id;
+
+        return (
+          <div className="flex flex-row">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    // onClick={() => navigate(`/company/view/${companyId}`)}
+                    onClick={() => {
+                      navigate(
+                        `/company/view/${encodeURIComponent(
+                          encryptId(companyId)
+                        )}`
+                      );
+                    }}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>View Company</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        );
+      },
+    },
+  ];
+
+  // Create the table instance
+  const table = useReactTable({
+    data: company || [],
+    columns,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+    },
+    initialState: {
+      pagination: {
+        pageSize: 7,
+      },
+    },
+  });
+
+  // Render loading state
   if (isLoading) {
     return (
       <Layout>
-        <Loader/>
+        <Loader data={"Company"} />
       </Layout>
     );
   }
 
   // Render error state
   if (isError) {
-    return ( 
+    return (
       <Layout>
-      <ErrorLoader onSuccess={refetch}/>
+        <ErrorLoader onSuccess={refetch} />
       </Layout>
     );
   }
-    return (
-        <Layout>
-            <div className="w-full p-4 ">
+  return (
+    <Layout>
+      <div className="w-full p-4 ">
         <div className="flex text-left text-2xl text-gray-800 font-[400]">
           Company List
         </div>
@@ -245,8 +235,6 @@ const CompanyList = () => {
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-      
-      
         </div>
         {/* table  */}
         <div className="rounded-md border">
@@ -256,16 +244,13 @@ const CompanyList = () => {
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                     return (
-                      <TableHead
-                        key={header.id}
-                       className=""
-                      >
+                      <TableHead key={header.id} className="">
                         {header.isPlaceholder
                           ? null
                           : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
                       </TableHead>
                     );
                   })}
@@ -328,8 +313,8 @@ const CompanyList = () => {
           </div>
         </div>
       </div>
-        </Layout>
-    )
-}
+    </Layout>
+  );
+};
 
-export default CompanyList
+export default CompanyList;

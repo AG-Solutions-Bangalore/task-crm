@@ -1,27 +1,33 @@
-import { useState, useEffect } from "react";
+import {
+  BookmarkCheck,
+  Building2,
+  ChevronDown,
+  ChevronUp,
+  Folder,
+  FolderGit2,
+  House,
+  User,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { NavLink, useLocation } from "react-router-dom";
-import { BookmarkCheck, Building2, ChevronDown, ChevronUp, FolderGit2, House, User } from "lucide-react";
-import moment from "moment";
 
 const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
   const [openSubmenu, setOpenSubmenu] = useState("");
   const [userType, setUserType] = useState(null);
   const [userInfo, setUserInfo] = useState({
     name: "",
-    lastLogin: ""
+    lastLogin: "",
   });
-  const location = useLocation(); 
-
+  const location = useLocation();
+  const storedUserType = useSelector((state) => state.auth.user_type);
+  const storedName = useSelector((state) => state.auth.name);
+  const storedLastLogin = useSelector((state) => state.auth.last_login);
   useEffect(() => {
-   
-    const storedUserType = localStorage.getItem("userType");
-    const storedName = localStorage.getItem("name");
-    const storedLastLogin = localStorage.getItem("last_login");
-    
     setUserType(storedUserType);
     setUserInfo({
       name: storedName || "",
-      lastLogin: storedLastLogin || ""
+      lastLogin: storedLastLogin || "",
     });
   }, []);
 
@@ -51,17 +57,24 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
       path: "/task",
       icon: BookmarkCheck,
     },
+
     {
       name: "Report",
-      path: "/report",
-      icon: BookmarkCheck,
+      icon: Folder,
+      subitems: [
+        { name: "Project", path: "/report/project" },
+        { name: "Task", path: "/report/task" },
+        { name: "Project Task", path: "/report/project/task" },
+      ],
     },
   ];
 
-  
-  const menuItems = userType === "1" 
-    ? allMenuItems.filter(item => item.name === "Task")
-    : allMenuItems;
+  const menuItems =
+    userType == "1"
+      ? allMenuItems.filter(
+          (item) => item.name == "Task" || item.name == "Dashboard"
+        )
+      : allMenuItems;
 
   useEffect(() => {
     const currentSubmenu = menuItems.find((item) =>
@@ -82,7 +95,6 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
       setIsOpen(false);
     }
   };
-
 
   const formatLastLogin = (dateString) => {
     if (!dateString) return "Never logged in";
@@ -158,14 +170,22 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
                       key={subItem.name}
                       to={subItem.path}
                       onClick={handleLinkClick}
-                      className={({ isActive }) => `
-                      py-2 px-3 text-sm rounded-lg block transition-colors
-                      ${
-                        isActive
-                          ? "bg-accent-50 text-accent-600"
-                          : "text-gray-600 hover:bg-gray-100"
-                      }
-                    `}
+                      //   className={({ isActive }) => `
+                      //   py-2 px-3 text-sm rounded-lg block transition-colors
+                      //   ${
+                      //     isActive
+                      //       ? "bg-accent-50 text-accent-600"
+                      //       : "text-gray-600 hover:bg-gray-100"
+                      //   }
+                      // `}
+                      className={() => `
+    py-2 px-3 text-sm rounded-lg block transition-colors
+    ${
+      location.pathname === subItem.path
+        ? "bg-accent-50 text-accent-600"
+        : "text-gray-600 hover:bg-gray-100"
+    }
+  `}
                     >
                       {subItem.name}
                     </NavLink>
@@ -178,11 +198,13 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
 
         {/* User info section at the bottom */}
         {!isCollapsed && (
-          <div className="p-4 border-t border-gray-200">
-            <div className="text-md font-medium text-gray-900">{userInfo.name}</div>
-            <div className="text-xs text-gray-500">
-              Last login: {moment(userInfo.lastLogin).format("DD-MM-YYYY")}
+          <div className="p-4 border-t border-gray-200 flex justify-center capitalize">
+            <div className="text-md font-medium text-gray-900">
+              {userInfo.name}
             </div>
+            {/* <div className="text-xs text-gray-500">
+              Last login: {moment(userInfo.lastLogin).format("DD-MM-YYYY")}
+            </div> */}
           </div>
         )}
       </div>

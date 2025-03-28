@@ -1,4 +1,4 @@
-import { Base_Url } from '@/config/BaseUrl';
+import { Base_Url } from "@/config/BaseUrl";
 import { useToast } from "@/hooks/use-toast";
 import React, { useEffect, useState } from "react";
 import {
@@ -29,7 +29,9 @@ import { Label } from "@/components/ui/label";
 import axios from "axios";
 import { Edit, Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-import ButtonConfigColor from '@/components/buttonComponent/ButtonConfig';
+import ButtonConfigColor from "@/components/buttonComponent/ButtonConfig";
+import useApiToken from "@/components/common/UseToken";
+import moment from "moment";
 
 const EditTask = ({ onSuccess, taskId }) => {
   const [open, setOpen] = useState(false);
@@ -38,34 +40,34 @@ const EditTask = ({ onSuccess, taskId }) => {
   const [isFetching, setIsFetching] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+  const token = useApiToken();
+
   const [formData, setFormData] = useState({
-    task_title: '',
-    task_desc: '',
-    task_due_date: '',
-    task_priority: '',
-    task_status: ''
+    task_title: "",
+    task_desc: "",
+    task_due_date: "",
+    task_priority: "",
+    task_status: "",
   });
 
   // Static options for dropdowns
   const priorityOptions = [
-    { value: 'Low', label: 'Low' },
-    { value: 'Medium', label: 'Medium' },
-    { value: 'High', label: 'High' }
+    { value: "Low", label: "Low" },
+    { value: "Medium", label: "Medium" },
+    { value: "High", label: "High" },
   ];
 
   const statusOptions = [
-    { value: 'Pending', label: 'Pending' },
-    { value: 'Approved', label: 'Approved' },
-    { value: 'In Process', label: 'In Process' },
-    { value: 'Completed', label: 'Completed' },
-    { value: 'Cancel', label: 'Cancel' }
+    { value: "Pending", label: "Pending" },
+    { value: "Approved", label: "Approved" },
+    { value: "In Process", label: "In Process" },
+    { value: "Completed", label: "Completed" },
+    { value: "Cancel", label: "Cancel" },
   ];
 
   const fetchTaskData = async () => {
     setIsFetching(true);
     try {
-      const token = localStorage.getItem("token");
       const response = await axios.get(
         `${Base_Url}/api/panel-fetch-task-by-id/${taskId}`,
         {
@@ -78,7 +80,7 @@ const EditTask = ({ onSuccess, taskId }) => {
         task_desc: taskData.task_desc,
         task_due_date: taskData.task_due_date,
         task_priority: taskData.task_priority,
-        task_status: taskData.task_status
+        task_status: taskData.task_status,
       });
     } catch (error) {
       toast({
@@ -123,12 +125,11 @@ const EditTask = ({ onSuccess, taskId }) => {
 
     setIsLoading(true);
     try {
-      const token = localStorage.getItem("token");
       const response = await axios.put(
         `${Base_Url}/api/panel-update-task/${taskId}`,
         {
           task_priority: formData.task_priority,
-          task_status: formData.task_status
+          task_status: formData.task_status,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -138,7 +139,7 @@ const EditTask = ({ onSuccess, taskId }) => {
       if (response?.data.code == 200) {
         toast({
           title: "Success",
-          description: response.data.msg
+          description: response.data.msg,
         });
 
         if (onSuccess) onSuccess();
@@ -209,7 +210,12 @@ const EditTask = ({ onSuccess, taskId }) => {
             <Label htmlFor="task_desc" className="text-right">
               Description
             </Label>
-            <div className="col-span-3 px-3 py-2 text-sm border rounded-md">
+
+            <div
+              id="task_desc"
+              className="col-span-3 px-3 py-2 text-sm border rounded-md resize-none overflow-hidden  min-h-[40px]"
+              style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
+            >
               {formData.task_desc}
             </div>
           </div>
@@ -218,7 +224,9 @@ const EditTask = ({ onSuccess, taskId }) => {
               Due Date
             </Label>
             <div className="col-span-3 px-3 py-2 text-sm border rounded-md">
-              {formData.task_due_date}
+              {formData.task_due_date
+                ? moment(formData.task_due_date).format("DD-MM-YYYY")
+                : ""}
             </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">

@@ -1,24 +1,25 @@
-import React, { useEffect, useState } from 'react';
-import Layout from '../../components/Layout';
-import axios from 'axios';
-import { Base_Url } from '@/config/BaseUrl';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import Loader from "@/components/loader/Loader";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Base_Url } from "@/config/BaseUrl";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import Layout from "../../components/Layout";
+import useApiToken from "@/components/common/UseToken";
+import { useSelector } from "react-redux";
 
 const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [userType, setUserType] = useState(null);
-
+  const token = useApiToken();
+  const storedUserType = useSelector((state) => state.auth.user_type);
   useEffect(() => {
-    // Get userType from localStorage when component mounts
-    const storedUserType = localStorage.getItem("userType");
     setUserType(storedUserType);
 
     const fetchDashboardData = async () => {
       try {
-        const token = localStorage.getItem("token");
+        setLoading(true);
         const response = await axios.get(
           `${Base_Url}/api/panel-fetch-dashboard`,
           {
@@ -27,7 +28,9 @@ const Dashboard = () => {
         );
         setDashboardData(response.data);
       } catch (err) {
-        setError(err.message || "Failed to fetch dashboard data");
+        setError(
+          err?.response?.data?.message || "Failed to fetch dashboard data"
+        );
       } finally {
         setLoading(false);
       }
@@ -39,9 +42,7 @@ const Dashboard = () => {
   if (loading) {
     return (
       <Layout>
-        <div className="flex justify-center items-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
+        <Loader data={"Dashboard"} />
       </Layout>
     );
   }
@@ -55,26 +56,66 @@ const Dashboard = () => {
   }
 
   const projectCards = [
-    { title: "Pending Projects", value: dashboardData?.project_pending_count, color: "bg-yellow-100 text-yellow-800" },
-    { title: "Confirmed Projects", value: dashboardData?.project_confirmed_count, color: "bg-blue-100 text-blue-800" },
-    { title: "In Progress", value: dashboardData?.project_onprogress_count, color: "bg-purple-100 text-purple-800" },
-    { title: "Canceled", value: dashboardData?.project_cancel_count, color: "bg-red-100 text-red-800" },
-    { title: "Completed", value: dashboardData?.project_completed_count, color: "bg-green-100 text-green-800" },
+    {
+      title: "Pending Projects",
+      value: dashboardData?.project_pending_count,
+      color: "bg-yellow-100 text-yellow-800",
+    },
+    {
+      title: "Confirmed Projects",
+      value: dashboardData?.project_confirmed_count,
+      color: "bg-blue-100 text-blue-800",
+    },
+    {
+      title: "In Progress",
+      value: dashboardData?.project_onprogress_count,
+      color: "bg-purple-100 text-purple-800",
+    },
+    {
+      title: "Canceled",
+      value: dashboardData?.project_cancel_count,
+      color: "bg-red-100 text-red-800",
+    },
+    {
+      title: "Completed",
+      value: dashboardData?.project_completed_count,
+      color: "bg-green-100 text-green-800",
+    },
   ];
 
   const taskCards = [
-    { title: "Pending Tasks", value: dashboardData?.task_pending_count, color: "bg-yellow-100 text-yellow-800" },
-    { title: "Approved Tasks", value: dashboardData?.task_approved_count, color: "bg-blue-100 text-blue-800" },
-    { title: "In Process", value: dashboardData?.task_inprocess_count, color: "bg-purple-100 text-purple-800" },
-    { title: "Completed", value: dashboardData?.task_completed_count, color: "bg-green-100 text-green-800" },
-    { title: "Canceled", value: dashboardData?.task_cancel_count, color: "bg-red-100 text-red-800" },
+    {
+      title: "Pending Tasks",
+      value: dashboardData?.task_pending_count,
+      color: "bg-yellow-100 text-yellow-800",
+    },
+    {
+      title: "Approved Tasks",
+      value: dashboardData?.task_approved_count,
+      color: "bg-blue-100 text-blue-800",
+    },
+    {
+      title: "In Process",
+      value: dashboardData?.task_inprocess_count,
+      color: "bg-purple-100 text-purple-800",
+    },
+    {
+      title: "Completed",
+      value: dashboardData?.task_completed_count,
+      color: "bg-green-100 text-green-800",
+    },
+    {
+      title: "Canceled",
+      value: dashboardData?.task_cancel_count,
+      color: "bg-red-100 text-red-800",
+    },
   ];
 
   return (
     <Layout>
       <div className="p-4 space-y-6">
         <h1 className="text-2xl font-bold">Dashboard Overview</h1>
-        
+
         {/* Always show Projects Section for all user types */}
         <div>
           <h2 className="text-xl font-semibold mb-4">Projects</h2>
@@ -82,10 +123,14 @@ const Dashboard = () => {
             {projectCards.map((card, index) => (
               <Card key={`project-${index}`} className="shadow-sm">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
+                  <CardTitle className="text-sm font-medium">
+                    {card.title}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className={`text-2xl font-bold rounded-full w-12 h-12 flex items-center justify-center ${card.color}`}>
+                  <div
+                    className={`text-2xl font-bold rounded-full w-12 h-12 flex items-center justify-center ${card.color}`}
+                  >
                     {card.value}
                   </div>
                 </CardContent>
@@ -102,10 +147,14 @@ const Dashboard = () => {
               {taskCards.map((card, index) => (
                 <Card key={`task-${index}`} className="shadow-sm">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
+                    <CardTitle className="text-sm font-medium">
+                      {card.title}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className={`text-2xl font-bold rounded-full w-12 h-12 flex items-center justify-center ${card.color}`}>
+                    <div
+                      className={`text-2xl font-bold rounded-full w-12 h-12 flex items-center justify-center ${card.color}`}
+                    >
                       {card.value}
                     </div>
                   </CardContent>

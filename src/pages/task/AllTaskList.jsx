@@ -1,17 +1,8 @@
 import Layout from "@/components/Layout";
-import React, { useState, useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
-import { useQuery } from "@tanstack/react-query";
-import { ArrowUpDown, ChevronDown, Edit, Loader2, Search } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import ErrorLoader from "@/components/loader/ErrorLoader";
+import Loader from "@/components/loader/Loader";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -27,6 +18,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Base_Url } from "@/config/BaseUrl";
+import { useQuery } from "@tanstack/react-query";
 import {
   flexRender,
   getCoreRowModel,
@@ -35,15 +29,18 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Base_Url } from "@/config/BaseUrl";
+import axios from "axios";
+import { ArrowUpDown, ChevronDown, Search } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import CreateTask from "./CreateTask";
-import Loader from "@/components/loader/Loader";
-import ErrorLoader from "@/components/loader/ErrorLoader";
 import EditTask from "./EditTask";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
+import useApiToken from "@/components/common/UseToken";
+import moment from "moment";
 
 const AllTaskList = () => {
+  const token = useApiToken();
+
   const {
     data: task,
     isLoading,
@@ -52,7 +49,6 @@ const AllTaskList = () => {
   } = useQuery({
     queryKey: ["task"],
     queryFn: async () => {
-      const token = localStorage.getItem("token");
       const response = await axios.get(
         `${Base_Url}/api/panel-fetch-task-list`,
         {
@@ -71,7 +67,6 @@ const AllTaskList = () => {
   const [projectTypeFilter, setProjectTypeFilter] = useState("all");
   const navigate = useNavigate();
 
-  
   const projectTypesWithCounts = useMemo(() => {
     if (!task) return [];
 
@@ -86,20 +81,26 @@ const AllTaskList = () => {
     }));
   }, [task]);
 
-  
   const totalTaskCount = useMemo(() => {
     if (!task) return 0;
     return task.length;
   }, [task]);
 
- 
   const filteredTasks = useMemo(() => {
     if (!task) return [];
     if (projectTypeFilter === "all") return task;
     return task.filter((t) => t.project_type === projectTypeFilter);
   }, [task, projectTypeFilter]);
 
- 
+  const statusColors = {
+    Pending: "bg-yellow-500 text-white", // Yellow
+    Approved: "bg-blue-500 text-white", // Blue
+    "In Process": "bg-cyan-500 text-white", // Light Blue
+    Cancel: "bg-red-500 text-white", // Red
+    Completed: "bg-green-500 text-white", // Green
+    default: "bg-gray-400 text-white", // Default Gray
+  };
+
   const columns = [
     {
       accessorKey: "id",
@@ -142,27 +143,55 @@ const AllTaskList = () => {
     {
       accessorKey: "task_desc",
       header: "Desc",
-      cell: ({ row }) => <div>{row.getValue("task_desc")}</div>,
+
+      cell: ({ row }) => (
+        <div
+          className="col-span-3 px-3 py-2 text-sm resize-none overflow-hidden   w-72"
+          style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
+        >
+          {row.getValue("task_desc")}
+        </div>
+      ),
     },
+
     {
       accessorKey: "task_created",
       header: "Created",
-      cell: ({ row }) => <div>{row.getValue("task_created")}</div>,
+      cell: ({ row }) => {
+        const date = row.getValue("task_created");
+        return <div>{date ? moment(date).format("DD-MM-YYYY") : "N/A"}</div>;
+      },
     },
     {
       accessorKey: "task_due_date",
       header: "Due",
-      cell: ({ row }) => <div>{row.getValue("task_due_date")}</div>,
+      cell: ({ row }) => {
+        const date = row.getValue("task_due_date");
+        return <div>{date ? moment(date).format("DD-MM-YYYY") : "N/A"}</div>;
+      },
     },
     {
       accessorKey: "task_priority",
       header: "Priority",
       cell: ({ row }) => <div>{row.getValue("task_priority")}</div>,
     },
+
     {
       accessorKey: "task_status",
       header: "Status",
-      cell: ({ row }) => <div>{row.getValue("task_status")}</div>,
+      cell: ({ row }) => {
+        const status = row.getValue("task_status");
+
+        return (
+          <span
+            className={`rounded-md px-2 py-1 text-sm resize-none overflow-hidden  ${
+              statusColors[status] || statusColors.default
+            }`}
+          >
+            {status}
+          </span>
+        );
+      },
     },
     {
       id: "actions",
@@ -179,7 +208,6 @@ const AllTaskList = () => {
     },
   ];
 
-  
   const table = useReactTable({
     data: filteredTasks || [],
     columns,
@@ -204,16 +232,14 @@ const AllTaskList = () => {
     },
   });
 
-  
   if (isLoading) {
     return (
       <Layout>
-        <Loader />
+        <Loader data="Task" />
       </Layout>
     );
   }
 
-  
   if (isError) {
     return (
       <Layout>
@@ -229,9 +255,6 @@ const AllTaskList = () => {
           Task List
         </div>
 
-       
-
-        {/* Search and filter controls */}
         <div className="flex flex-col md:flex-row items-center py-4 gap-4">
           <div className="relative w-full md:w-72">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
