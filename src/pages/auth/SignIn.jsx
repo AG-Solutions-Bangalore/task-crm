@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import ButtonConfigColor from "@/components/buttonComponent/ButtonConfig";
 import { loginSuccess } from "@/redux/authSlice";
 import { useDispatch } from "react-redux";
+import { validateEnvironment } from "@/components/common/EncryptionDecryption";
 
 const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -30,6 +31,17 @@ const SignIn = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    try {
+      validateEnvironment();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description:
+          "Invalid environment detected!",
+        variant: "destructive",
+      });
+      return; 
+    }
 
     // Validation
     if (!formData.mobile) {
