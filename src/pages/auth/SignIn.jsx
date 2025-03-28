@@ -16,8 +16,8 @@ const SignIn = () => {
   const { toast } = useToast();
   const dispatch = useDispatch();
   const [formData, setFormData] = useState({
-    mobile: "9360485526",
-    password: "123456",
+    mobile: "",
+    password: "",
   });
 
   const handleChange = (e) => {
