@@ -24,6 +24,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SquarePlus } from "lucide-react";
 import { Base_Url } from "@/config/BaseUrl";
 import { useToast } from "@/hooks/use-toast";
+import ButtonConfigColor from "@/components/buttonComponent/ButtonConfig";
 
 const fetchProjects = async () => {
   const token = localStorage.getItem("token");
@@ -62,7 +63,7 @@ const fetchUsers = async () => {
 const createTask = async (taskData) => {
   const token = localStorage.getItem("token");
   const response = await axios.post(
-    `${Base_Url}/api/panel-create-task`, 
+    `${Base_Url}/api/panel-create-task`,
     taskData,
     {
       headers: {
@@ -77,6 +78,7 @@ const createTask = async (taskData) => {
 const CreateTask = ({ onSuccess }) => {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     project_id: "",
@@ -85,7 +87,7 @@ const CreateTask = ({ onSuccess }) => {
     task_title: "",
     task_desc: "",
     task_due_date: "",
-    task_priority: "Medium", 
+    task_priority: "Medium",
   });
 
   const [projects, setProjects] = useState([]);
@@ -97,12 +99,11 @@ const CreateTask = ({ onSuccess }) => {
     users: false,
   });
 
-
   const getMinDate = () => {
     const today = new Date();
     const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
 
@@ -177,6 +178,7 @@ const CreateTask = ({ onSuccess }) => {
   const createTaskMutation = useMutation({
     mutationFn: createTask,
     onSuccess: (response) => {
+      setLoading(false);
       if (response.code === 200) {
         toast({
           title: "Success",
@@ -204,6 +206,8 @@ const CreateTask = ({ onSuccess }) => {
       }
     },
     onError: (error) => {
+      setLoading(false);
+
       toast({
         title: "Error",
         description: error.message || "Failed to create task",
@@ -252,6 +256,7 @@ const CreateTask = ({ onSuccess }) => {
       });
       return;
     }
+    setLoading(true);
 
     createTaskMutation.mutate(formData);
   };
@@ -259,9 +264,12 @@ const CreateTask = ({ onSuccess }) => {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="default" className="ml-2">
-          <SquarePlus className="h-4 w-4 mr-2" /> Task
-        </Button>
+        <ButtonConfigColor
+          type="button"
+          buttontype="create"
+          label="Task"
+          className="ml-2"
+        />
       </SheetTrigger>
 
       <SheetContent className="sm:max-w-md overflow-y-auto">
@@ -277,7 +285,9 @@ const CreateTask = ({ onSuccess }) => {
                 Project *
               </Label>
               <Select
-                onValueChange={(value) => handleSelectChange("project_id", value)}
+                onValueChange={(value) =>
+                  handleSelectChange("project_id", value)
+                }
                 value={formData.project_id}
                 disabled={isLoading.projects}
               >
@@ -300,7 +310,9 @@ const CreateTask = ({ onSuccess }) => {
                 Project Type *
               </Label>
               <Select
-                onValueChange={(value) => handleSelectChange("project_type", value)}
+                onValueChange={(value) =>
+                  handleSelectChange("project_type", value)
+                }
                 value={formData.project_type}
                 disabled={isLoading.projectSubs || !formData.project_id}
               >
@@ -357,7 +369,7 @@ const CreateTask = ({ onSuccess }) => {
             {/* Task Description */}
             <div className="grid gap-2">
               <Label htmlFor="task_desc" className="font-semibold">
-                Task Description 
+                Task Description
               </Label>
               <Textarea
                 id="task_desc"
@@ -381,7 +393,7 @@ const CreateTask = ({ onSuccess }) => {
                 value={formData.task_due_date}
                 onChange={handleInputChange}
                 className="cursor-pointer"
-                min={getMinDate()} // Prevent selecting past dates
+                min={getMinDate()}
               />
             </div>
 
@@ -390,8 +402,8 @@ const CreateTask = ({ onSuccess }) => {
               <Label htmlFor="task_priority" className="font-semibold">
                 Priority
               </Label>
-              <Tabs 
-                value={formData.task_priority} 
+              <Tabs
+                value={formData.task_priority}
                 onValueChange={handlePriorityChange}
                 className="w-full"
               >
@@ -405,13 +417,16 @@ const CreateTask = ({ onSuccess }) => {
           </div>
 
           <SheetFooter className="mt-4">
-            <Button
+            <ButtonConfigColor
+              loading={loading}
               type="submit"
+              buttontype="submit"
               disabled={createTaskMutation.isPending}
+              label={
+                createTaskMutation.isPending ? "Creating..." : "Create Task"
+              }
               className="w-full"
-            >
-              {createTaskMutation.isPending ? "Creating..." : "Create Task"}
-            </Button>
+            />
           </SheetFooter>
         </form>
       </SheetContent>

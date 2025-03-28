@@ -1,26 +1,7 @@
-import React, { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import axios from "axios"; 
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetFooter,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import ButtonConfigColor from "@/components/buttonComponent/ButtonConfig";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-  TableHeader,
-  TableHead,
-} from "@/components/ui/table";
 import {
   Select,
   SelectContent,
@@ -29,42 +10,59 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  SquarePlus,
-  PlusCircle,
-  MinusCircle,
-} from "lucide-react";
+  Sheet,
+  SheetContent,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 import { Base_Url } from "@/config/BaseUrl";
 import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
+import { MinusCircle, PlusCircle } from "lucide-react";
+import { useState } from "react";
 
 const PROJECT_TYPES = [
   "Marketing",
   "IOS App",
   "Android App",
   "Web Application",
-  "Website"
+  "Website",
+  "Festive Posts",
 ];
 
 const createProject = async (projectData) => {
   const token = localStorage.getItem("token");
-  
+
   const response = await axios.post(
-    `${Base_Url}/api/panel-create-project`, 
+    `${Base_Url}/api/panel-create-project`,
     projectData,
     {
-      headers: { 
+      headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
+        "Content-Type": "application/json",
+      },
     }
   );
-  
+
   return response.data;
 };
 
 const CreateProject = ({ onSuccess }) => {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
-
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     project_name: "",
     project_desc: "",
@@ -81,6 +79,7 @@ const CreateProject = ({ onSuccess }) => {
   const createProjectMutation = useMutation({
     mutationFn: createProject,
     onSuccess: (response) => {
+      setLoading(false);
       if (response.code === 200) {
         toast({
           title: "Success",
@@ -112,6 +111,7 @@ const CreateProject = ({ onSuccess }) => {
       }
     },
     onError: (error) => {
+      setLoading(false);
       toast({
         title: "Error",
         description: error.message || "Failed to create project",
@@ -156,15 +156,20 @@ const CreateProject = ({ onSuccess }) => {
   const getMinDate = () => {
     const today = new Date();
     const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    if (!formData.project_name || !formData.client_name || !projectData[0].project_type || !projectData[0].project_due_date) {
+
+    if (
+      !formData.project_name ||
+      !formData.client_name ||
+      !projectData[0].project_type ||
+      !projectData[0].project_due_date
+    ) {
       toast({
         title: "Error",
         description: "Fill the required field",
@@ -183,6 +188,7 @@ const CreateProject = ({ onSuccess }) => {
         return;
       }
     }
+    setLoading(true);
 
     // Prepare request data
     const requestData = {
@@ -197,9 +203,12 @@ const CreateProject = ({ onSuccess }) => {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="default" className="ml-2">
-          <SquarePlus className="h-4 w-4 mr-2" /> Project
-        </Button>
+        <ButtonConfigColor
+          type="button"
+          buttontype="create"
+          label="Project"
+          className="ml-2"
+        />
       </SheetTrigger>
 
       <SheetContent className="sm:max-w-md overflow-y-auto">
@@ -236,7 +245,7 @@ const CreateProject = ({ onSuccess }) => {
 
             <div className="grid gap-2">
               <Label htmlFor="project_desc" className="font-semibold">
-                Project Description 
+                Project Description
               </Label>
               <Textarea
                 id="project_desc"
@@ -265,7 +274,11 @@ const CreateProject = ({ onSuccess }) => {
                         <Select
                           value={item.project_type}
                           onValueChange={(value) =>
-                            handleProjectDataChange(index, "project_type", value)
+                            handleProjectDataChange(
+                              index,
+                              "project_type",
+                              value
+                            )
                           }
                         >
                           <SelectTrigger>
@@ -325,13 +338,18 @@ const CreateProject = ({ onSuccess }) => {
           </div>
 
           <SheetFooter className="mt-4">
-            <Button
+            <ButtonConfigColor
+              loading={loading}
               type="submit"
+              buttontype="submit"
               disabled={createProjectMutation.isPending}
+              label={
+                createProjectMutation.isPending
+                  ? "Creating..."
+                  : "Create Project"
+              }
               className="w-full"
-            >
-              {createProjectMutation.isPending ? "Creating..." : "Create Project"}
-            </Button>
+            />
           </SheetFooter>
         </form>
       </SheetContent>

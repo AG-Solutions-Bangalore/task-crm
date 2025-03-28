@@ -1,16 +1,14 @@
-import React, { useState, useEffect, useRef } from "react";
+import ButtonConfigColor from "@/components/buttonComponent/ButtonConfig";
+import Layout from "@/components/Layout";
+import ErrorLoader from "@/components/loader/ErrorLoader";
+import Loader from "@/components/loader/Loader";
+import { Label } from "@/components/ui/label";
+import { Base_Url } from "@/config/BaseUrl";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import Layout from "@/components/Layout";
-import { Base_Url } from "@/config/BaseUrl";
-import { Label } from "@/components/ui/label";
-import { useReactToPrint } from "react-to-print";
-import { Printer } from "lucide-react";
-import ButtonConfigColor from "@/components/buttonComponent/ButtonConfig";
-import { Button } from "@/components/ui/button";
-import Loader from "@/components/loader/Loader";
-import ErrorLoader from "@/components/loader/ErrorLoader";
 import moment from "moment";
+import { useEffect, useRef, useState } from "react";
+import { useReactToPrint } from "react-to-print";
 
 const ProjectTask = () => {
   const [formData, setFormData] = useState({

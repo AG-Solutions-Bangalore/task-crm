@@ -1,17 +1,8 @@
 import Layout from "@/components/Layout";
-import React, { useState, useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
-import { useQuery } from "@tanstack/react-query";
-import { ArrowUpDown, ChevronDown, Edit, Loader2, Search } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import ErrorLoader from "@/components/loader/ErrorLoader";
+import Loader from "@/components/loader/Loader";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -27,6 +18,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Base_Url } from "@/config/BaseUrl";
+import { useQuery } from "@tanstack/react-query";
 import {
   flexRender,
   getCoreRowModel,
@@ -35,13 +29,12 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Base_Url } from "@/config/BaseUrl";
+import axios from "axios";
+import { ArrowUpDown, ChevronDown, Search } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import CreateTask from "./CreateTask";
-import Loader from "@/components/loader/Loader";
-import ErrorLoader from "@/components/loader/ErrorLoader";
 import EditTask from "./EditTask";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 
 const AllTaskList = () => {
   const {
@@ -71,7 +64,6 @@ const AllTaskList = () => {
   const [projectTypeFilter, setProjectTypeFilter] = useState("all");
   const navigate = useNavigate();
 
-  
   const projectTypesWithCounts = useMemo(() => {
     if (!task) return [];
 
@@ -86,20 +78,17 @@ const AllTaskList = () => {
     }));
   }, [task]);
 
-  
   const totalTaskCount = useMemo(() => {
     if (!task) return 0;
     return task.length;
   }, [task]);
 
- 
   const filteredTasks = useMemo(() => {
     if (!task) return [];
     if (projectTypeFilter === "all") return task;
     return task.filter((t) => t.project_type === projectTypeFilter);
   }, [task, projectTypeFilter]);
 
- 
   const columns = [
     {
       accessorKey: "id",
@@ -179,7 +168,6 @@ const AllTaskList = () => {
     },
   ];
 
-  
   const table = useReactTable({
     data: filteredTasks || [],
     columns,
@@ -204,16 +192,14 @@ const AllTaskList = () => {
     },
   });
 
-  
   if (isLoading) {
     return (
       <Layout>
-        <Loader />
+        <Loader data="Task" />
       </Layout>
     );
   }
 
-  
   if (isError) {
     return (
       <Layout>
@@ -228,8 +214,6 @@ const AllTaskList = () => {
         <div className="flex text-left text-2xl text-gray-800 font-[400]">
           Task List
         </div>
-
-       
 
         {/* Search and filter controls */}
         <div className="flex flex-col md:flex-row items-center py-4 gap-4">

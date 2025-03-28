@@ -1,7 +1,14 @@
 import React from "react";
 import { FaArrowLeft, FaPlus } from "react-icons/fa";
 import { FiLoader } from "react-icons/fi";
-import { FileCog, PlusCircle, Printer } from "lucide-react";
+import {
+  FileCog,
+  LogOut,
+  PlusCircle,
+  Printer,
+  SquarePlus,
+  Trash2,
+} from "lucide-react";
 
 const ButtonConfigColor = ({
   type,
@@ -14,7 +21,7 @@ const ButtonConfigColor = ({
 }) => {
   const getButtonStyles = () => {
     const baseStyles =
-      "px-6 py-2 text-sm font-medium rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105";
+      "px-3 py-2 text-sm font-medium rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105";
 
     switch (buttontype) {
       case "submit":
@@ -28,6 +35,10 @@ const ButtonConfigColor = ({
       case "print":
         return `${baseStyles} text-white bg-black hover:bg-gray-900`;
       case "normal":
+        return `${baseStyles} text-white bg-black hover:bg-gray-900`;
+      case "delete":
+        return `${baseStyles} text-white bg-black hover:bg-gray-900`;
+      case "logout":
         return `${baseStyles} text-white bg-black hover:bg-gray-900`;
       default:
         return `${baseStyles} text-white bg-black hover:bg-gray-900`;
@@ -43,9 +54,13 @@ const ButtonConfigColor = ({
       case "back":
         return <FaArrowLeft className="w-4 h-4" />;
       case "create":
-        return <FaPlus className="w-4 h-4" />;
+        return <SquarePlus className="w-4 h-4" />;
       case "update":
         return <FileCog className="w-4 h-4" />;
+      case "delete":
+        return <Trash2 className="w-4 h-4" />;
+      case "logout":
+        return <LogOut className="w-4 h-4" />;
       case "print":
         return <Printer className="w-4 h-4" />;
 
@@ -57,7 +72,7 @@ const ButtonConfigColor = ({
   return (
     <button
       type={type}
-      className={`px-4 py-2 rounded-lg transition-all duration-300 ${getButtonStyles()} ${
+      className={`px-2 py-2 rounded-lg transition-all duration-300 ${getButtonStyles()} ${
         disabled || loading ? "opacity-50 cursor-not-allowed" : ""
       } ${className || ""}`}
       onClick={onClick}

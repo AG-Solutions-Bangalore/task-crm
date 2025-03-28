@@ -2,11 +2,10 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-import mainLogo from "../../assets/kmrlive.png"; // Ensure the path is correct
-
 import { Base_Url } from "../../config/BaseUrl";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import ButtonConfigColor from "@/components/buttonComponent/ButtonConfig";
 
 const ForgetPassword = () => {
   const [mobile, setMobile] = useState("");
@@ -14,7 +13,6 @@ const ForgetPassword = () => {
   const { toast } = useToast();
   const onResetPassword = () => {
     const data = {
-      username: username,
       mobile: mobile,
     };
 
@@ -60,18 +58,45 @@ const ForgetPassword = () => {
       <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
         {/* Logo */}
         <div className="flex justify-center mb-6">
-        <div className="font-semibold flex items-center space-x-2">
+          <div className="font-semibold flex items-center space-x-2">
             <div className="flex items-center">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-yellow-800">
-                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="text-yellow-800"
+              >
+                <path
+                  d="M12 2L2 7L12 12L22 7L12 2Z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M2 17L12 22L22 17"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M2 12L12 17L22 12"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-bold text-yellow-900 leading-tight">Task Management</span>
+              <span className="text-sm font-bold text-yellow-900 leading-tight">
+                Task Management
+              </span>
             </div>
-            </div>
+          </div>
         </div>
 
         {/* Title */}
@@ -104,14 +129,13 @@ const ForgetPassword = () => {
             />
           </div>
 
-          {/* Reset Password Button */}
-          <Button
+          <ButtonConfigColor
+            type="button"
+            buttontype="normal"
             onClick={onResetPassword}
-            className="w-full py-3 px-4  font-medium rounded-lg hover:bg-accent-600 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2 transition-all transform hover:scale-105 active:scale-95"
-          >
-            Reset Password
-          </Button>
-
+            label={"Reset Password"}
+            className="w-full"
+          />
           {/* Back to Login Link */}
           <div className="text-center">
             <Link

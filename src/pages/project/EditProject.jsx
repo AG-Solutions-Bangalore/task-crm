@@ -41,13 +41,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import Loader from "@/components/loader/Loader";
+import ButtonConfigColor from "@/components/buttonComponent/ButtonConfig";
 
 const PROJECT_TYPES = [
   "Marketing",
   "IOS App",
   "Android App",
   "Web Application",
-  "Website"
+  "Website",
+  "Festive Posts",
 ];
 
 const statusOptions = [
@@ -64,10 +67,10 @@ const updateProject = async ({ projectId, projectData }) => {
     `${Base_Url}/api/panel-update-project/${projectId}`,
     projectData,
     {
-      headers: { 
+      headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
+        "Content-Type": "application/json",
+      },
     }
   );
   return response.data;
@@ -78,9 +81,9 @@ const deleteProjectSub = async (projectSubId) => {
   const response = await axios.delete(
     `${Base_Url}/api/panel-delete-project-sub/${projectSubId}`,
     {
-      headers: { 
+      headers: {
         Authorization: `Bearer ${token}`,
-      }
+      },
     }
   );
   return response.data;
@@ -92,6 +95,8 @@ const EditProject = ({ projectId, onSuccess }) => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteItemId, setDeleteItemId] = useState(null);
   const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [deleteloading, setdeleteLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     project_name: "",
@@ -118,8 +123,8 @@ const EditProject = ({ projectId, onSuccess }) => {
   const getMinDate = () => {
     const today = new Date();
     const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
 
@@ -143,21 +148,25 @@ const EditProject = ({ projectId, onSuccess }) => {
           project_status: project.project_status,
         });
 
-        const mappedProjectData = response.data.projectSub.map(sub => ({
+        const mappedProjectData = response.data.projectSub.map((sub) => ({
           id: sub.id,
           project_type: sub.project_type,
           project_due_date: sub.project_due_date,
           projectSub_status: sub.projectSub_status,
         }));
 
-        setProjectData(mappedProjectData.length > 0 ? mappedProjectData : [
-          {
-            id: null,
-            project_type: "",
-            project_due_date: "",
-            projectSub_status: "Pending",
-          },
-        ]);
+        setProjectData(
+          mappedProjectData.length > 0
+            ? mappedProjectData
+            : [
+                {
+                  id: null,
+                  project_type: "",
+                  project_due_date: "",
+                  projectSub_status: "Pending",
+                },
+              ]
+        );
       }
     } catch (error) {
       toast({
@@ -171,8 +180,11 @@ const EditProject = ({ projectId, onSuccess }) => {
   };
 
   const updateProjectMutation = useMutation({
-    mutationFn: ({ projectId, projectData }) => updateProject({ projectId, projectData }),
+    mutationFn: ({ projectId, projectData }) =>
+      updateProject({ projectId, projectData }),
     onSuccess: (response) => {
+      setLoading(false);
+
       if (response.code === 200) {
         toast({
           title: "Success",
@@ -190,6 +202,8 @@ const EditProject = ({ projectId, onSuccess }) => {
       }
     },
     onError: (error) => {
+      setLoading(false);
+
       toast({
         title: "Error",
         description: error.message || "Failed to update project",
@@ -201,12 +215,16 @@ const EditProject = ({ projectId, onSuccess }) => {
   const deleteProjectSubMutation = useMutation({
     mutationFn: deleteProjectSub,
     onSuccess: (response, projectSubId) => {
+      setdeleteLoading(false);
+
       if (response.code === 200) {
         toast({
           title: "Success",
           description: response.msg || "Project item deleted successfully",
         });
-        setProjectData(prev => prev.filter(item => item.id !== projectSubId));
+        setProjectData((prev) =>
+          prev.filter((item) => item.id !== projectSubId)
+        );
       } else {
         toast({
           title: "Error",
@@ -216,6 +234,8 @@ const EditProject = ({ projectId, onSuccess }) => {
       }
     },
     onError: (error) => {
+      setdeleteLoading(false);
+
       toast({
         title: "Error",
         description: error.message || "Failed to delete project item",
@@ -264,6 +284,8 @@ const EditProject = ({ projectId, onSuccess }) => {
   };
 
   const confirmDelete = async () => {
+    setdeleteLoading(true);
+
     if (deleteItemId) {
       await deleteProjectSubMutation.mutateAsync(deleteItemId);
     }
@@ -273,8 +295,13 @@ const EditProject = ({ projectId, onSuccess }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    if (!formData.project_name || !formData.client_name || !projectData[0].project_type || !projectData[0].project_due_date) {
+
+    if (
+      !formData.project_name ||
+      !formData.client_name ||
+      !projectData[0].project_type ||
+      !projectData[0].project_due_date
+    ) {
       toast({
         title: "Error",
         description: "Fill the required fields",
@@ -293,10 +320,11 @@ const EditProject = ({ projectId, onSuccess }) => {
         return;
       }
     }
+    setLoading(true);
 
     const requestData = {
       ...formData,
-      project_data: projectData.map(item => ({
+      project_data: projectData.map((item) => ({
         id: item.id || undefined,
         project_type: item.project_type,
         project_due_date: item.project_due_date,
@@ -323,7 +351,7 @@ const EditProject = ({ projectId, onSuccess }) => {
 
           {isFetching ? (
             <div className="flex justify-center items-center h-64">
-              <Loader2 className="h-8 w-8 animate-spin" />
+              <Loader data={"Project"} />
             </div>
           ) : (
             <>
@@ -349,8 +377,11 @@ const EditProject = ({ projectId, onSuccess }) => {
                     </Label>
                     <Select
                       value={formData.project_status}
-                      onValueChange={(value) => 
-                        setFormData(prev => ({ ...prev, project_status: value }))
+                      onValueChange={(value) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          project_status: value,
+                        }))
                       }
                     >
                       <SelectTrigger className="">
@@ -368,7 +399,7 @@ const EditProject = ({ projectId, onSuccess }) => {
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="project_desc" className="font-semibold">
-                    Project Description 
+                    Project Description
                   </Label>
                   <Textarea
                     id="project_desc"
@@ -398,7 +429,11 @@ const EditProject = ({ projectId, onSuccess }) => {
                             <Select
                               value={item.project_type}
                               onValueChange={(value) =>
-                                handleProjectDataChange(index, "project_type", value)
+                                handleProjectDataChange(
+                                  index,
+                                  "project_type",
+                                  value
+                                )
                               }
                             >
                               <SelectTrigger>
@@ -444,7 +479,10 @@ const EditProject = ({ projectId, onSuccess }) => {
                               </SelectTrigger>
                               <SelectContent>
                                 {statusOptions.map((option) => (
-                                  <SelectItem key={option.value} value={option.value}>
+                                  <SelectItem
+                                    key={option.value}
+                                    value={option.value}
+                                  >
                                     {option.label}
                                   </SelectItem>
                                 ))}
@@ -484,7 +522,7 @@ const EditProject = ({ projectId, onSuccess }) => {
               </div>
 
               <SheetFooter className="mt-4">
-                <Button
+                {/* <Button
                   type="submit"
                   disabled={updateProjectMutation.isPending}
                   className="w-full"
@@ -497,36 +535,49 @@ const EditProject = ({ projectId, onSuccess }) => {
                   ) : (
                     "Update Project"
                   )}
-                </Button>
+                </Button> */}
+
+                <ButtonConfigColor
+                  loading={loading}
+                  buttontype="update"
+                  type="submit"
+                  disabled={updateProjectMutation.isPending}
+                  className="w-full"
+                  label={
+                    updateProjectMutation.isPending
+                      ? "Updating..."
+                      : "Update Project"
+                  }
+                />
               </SheetFooter>
             </>
           )}
         </form>
 
-        <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialog
+          open={deleteConfirmOpen}
+          onOpenChange={setDeleteConfirmOpen}
+        >
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Are you sure?</AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete the project item.
+                This action cannot be undone. This will permanently delete the
+                project item.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction 
+
+              <ButtonConfigColor
+                loading={deleteloading}
                 onClick={confirmDelete}
+                buttontype="delete"
                 disabled={deleteProjectSubMutation.isPending}
-                className="bg-red-600 hover:bg-red-700"
-              >
-                {deleteProjectSubMutation.isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Deleting...
-                  </>
-                ) : (
-                  "Delete"
-                )}
-              </AlertDialogAction>
+                label={
+                  deleteProjectSubMutation.isPending ? "Deleting..." : "Delete"
+                }
+              />
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

@@ -73,7 +73,9 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
 
   const menuItems =
     userType === "1"
-      ? allMenuItems.filter((item) => item.name === "Task")
+      ? allMenuItems.filter(
+          (item) => item.name === "Task" || item.name === "Dashboard"
+        )
       : allMenuItems;
 
   useEffect(() => {
