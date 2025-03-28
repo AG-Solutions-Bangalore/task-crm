@@ -1,3 +1,4 @@
+import useApiToken from "@/components/common/UseToken";
 import Layout from "@/components/Layout";
 import ErrorLoader from "@/components/loader/ErrorLoader";
 import Loader from "@/components/loader/Loader";
@@ -34,9 +35,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CreateProject from "./CreateProject";
 import EditProject from "./EditProject";
-import { Badge } from "@/components/ui/badge";
 
 const ProjectList = () => {
+  const token = useApiToken();
+
   const {
     data: project,
     isLoading,
@@ -45,7 +47,6 @@ const ProjectList = () => {
   } = useQuery({
     queryKey: ["projects"],
     queryFn: async () => {
-      const token = localStorage.getItem("token");
       const response = await axios.get(
         `${Base_Url}/api/panel-fetch-project-list`,
         {
@@ -127,7 +128,7 @@ const ProjectList = () => {
 
         return (
           <span
-            className={`px-2 py-1 text-sm font-bold rounded-md ${
+            className={`px-2 py-1 text-sm  rounded-md ${
               statusColors[status] || statusColors.default
             }`}
           >

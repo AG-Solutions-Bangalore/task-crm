@@ -1,28 +1,29 @@
-import React, { useState, useEffect, useRef } from "react";
+import ButtonConfigColor from "@/components/buttonComponent/ButtonConfig";
+import useApiToken from "@/components/common/UseToken";
+import Layout from "@/components/Layout";
+import ErrorLoader from "@/components/loader/ErrorLoader";
+import Loader from "@/components/loader/Loader";
+import { Label } from "@/components/ui/label";
+import { Base_Url } from "@/config/BaseUrl";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import Layout from "@/components/Layout";
-import { Base_Url } from "@/config/BaseUrl";
-import { Label } from "@/components/ui/label";
-import { useReactToPrint } from "react-to-print";
-import { Printer } from "lucide-react";
-import ButtonConfigColor from "@/components/buttonComponent/ButtonConfig";
-import { Button } from "@/components/ui/button";
-import Loader from "@/components/loader/Loader";
-import ErrorLoader from "@/components/loader/ErrorLoader";
 import moment from "moment";
+import { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
+import { useReactToPrint } from "react-to-print";
 
 const UserReport = () => {
   const [formData, setFormData] = useState({
     to_id: "",
   });
-  const containerRef = useRef();
+  const token = useApiToken();
 
+  const containerRef = useRef();
+  const storedUserId = useSelector((state) => state.auth.user_type);
   const [userId, setUserId] = useState(null);
   const isDisabled = userId === "1";
 
   useEffect(() => {
-    const storedUserId = localStorage.getItem("userType");
     setUserId(storedUserId);
 
     setFormData({ to_id: storedUserId });
@@ -35,7 +36,6 @@ const UserReport = () => {
   } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
-      const token = localStorage.getItem("token");
       const response = await axios.get(`${Base_Url}/api/panel-fetch-user`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -52,7 +52,6 @@ const UserReport = () => {
     queryKey: ["task", formData.to_id],
     queryFn: async () => {
       if (!formData.to_id) return [];
-      const token = localStorage.getItem("token");
       const response = await axios.post(
         `${Base_Url}/api/panel-fetch-task-list-report`,
         formData,
@@ -234,7 +233,15 @@ const UserReport = () => {
                               <td className="border border-black px-1 py-2">
                                 {project.from_name}
                               </td>
-                              <td className="border border-black px-1 py-2">
+                              <td
+                                // className="border border-black px-1 py-2"
+                                className="border border-black px-1 py-2 text-left align-top 
+                               max-w-[200px] overflow-hidden break-words"
+                                style={{
+                                  whiteSpace: "pre-wrap",
+                                  wordBreak: "break-word",
+                                }}
+                              >
                                 {project.task_desc}
                               </td>
 

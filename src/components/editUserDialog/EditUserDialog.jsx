@@ -1,15 +1,14 @@
-import { Base_Url } from "@/config/BaseUrl";
-import { useToast } from "@/hooks/use-toast";
-import React, { useEffect } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
   DialogTrigger,
-  DialogDescription,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -23,14 +22,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useState } from "react";
-import axios from "axios";
-import { Edit, Loader2 } from "lucide-react";
+import { Base_Url } from "@/config/BaseUrl";
+import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+import { Edit } from "lucide-react";
+import { useEffect, useState } from "react";
 import ButtonConfigColor from "../buttonComponent/ButtonConfig";
+import useApiToken from "../common/UseToken";
 
 const EditUserDialog = ({ onSuccess, userId }) => {
   const [open, setOpen] = useState(false);
@@ -44,11 +43,11 @@ const EditUserDialog = ({ onSuccess, userId }) => {
     email: "",
     status: "",
   });
+  const token = useApiToken();
 
   const fetchCustomerData = async () => {
     setIsFetching(true);
     try {
-      const token = localStorage.getItem("token");
       const response = await axios.get(
         `${Base_Url}/api/panel-fetch-user-by-id/${userId}`,
         {
@@ -105,7 +104,6 @@ const EditUserDialog = ({ onSuccess, userId }) => {
 
     setIsLoading(true);
     try {
-      const token = localStorage.getItem("token");
       const response = await axios.put(
         `${Base_Url}/api/panel-update-user/${userId}`,
         formData,

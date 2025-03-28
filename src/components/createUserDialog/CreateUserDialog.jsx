@@ -1,30 +1,29 @@
-import { useToast } from "@/hooks/use-toast";
-import React from "react";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
+import { useState } from "react";
 
-import { Loader2, SquarePlus } from "lucide-react";
 
-import { useLocation } from "react-router-dom";
 import { Base_Url } from "@/config/BaseUrl";
+import { useLocation } from "react-router-dom";
 import ButtonConfigColor from "../buttonComponent/ButtonConfig";
+import useApiToken from "../common/UseToken";
 
 const CreateUserDialog = ({ onSuccess }) => {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { pathname } = useLocation();
+  const token = useApiToken();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -52,7 +51,6 @@ const CreateUserDialog = ({ onSuccess }) => {
 
     setIsLoading(true);
     try {
-      const token = localStorage.getItem("token");
       const response = await axios.post(
         `${Base_Url}/api/panel-create-user`,
         formData,

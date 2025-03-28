@@ -1,5 +1,3 @@
-import { useState, useEffect } from "react";
-import { NavLink, useLocation } from "react-router-dom";
 import {
   BookmarkCheck,
   Building2,
@@ -10,7 +8,9 @@ import {
   House,
   User,
 } from "lucide-react";
-import moment from "moment";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { NavLink, useLocation } from "react-router-dom";
 
 const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
   const [openSubmenu, setOpenSubmenu] = useState("");
@@ -20,12 +20,10 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
     lastLogin: "",
   });
   const location = useLocation();
-
+  const storedUserType = useSelector((state) => state.auth.user_type);
+  const storedName = useSelector((state) => state.auth.name);
+  const storedLastLogin = useSelector((state) => state.auth.last_login);
   useEffect(() => {
-    const storedUserType = localStorage.getItem("userType");
-    const storedName = localStorage.getItem("name");
-    const storedLastLogin = localStorage.getItem("last_login");
-
     setUserType(storedUserType);
     setUserInfo({
       name: storedName || "",
@@ -72,9 +70,9 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
   ];
 
   const menuItems =
-    userType === "1"
+    userType == "1"
       ? allMenuItems.filter(
-          (item) => item.name === "Task" || item.name === "Dashboard"
+          (item) => item.name == "Task" || item.name == "Dashboard"
         )
       : allMenuItems;
 
@@ -172,14 +170,22 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
                       key={subItem.name}
                       to={subItem.path}
                       onClick={handleLinkClick}
-                      className={({ isActive }) => `
-                      py-2 px-3 text-sm rounded-lg block transition-colors
-                      ${
-                        isActive
-                          ? "bg-accent-50 text-accent-600"
-                          : "text-gray-600 hover:bg-gray-100"
-                      }
-                    `}
+                      //   className={({ isActive }) => `
+                      //   py-2 px-3 text-sm rounded-lg block transition-colors
+                      //   ${
+                      //     isActive
+                      //       ? "bg-accent-50 text-accent-600"
+                      //       : "text-gray-600 hover:bg-gray-100"
+                      //   }
+                      // `}
+                      className={() => `
+    py-2 px-3 text-sm rounded-lg block transition-colors
+    ${
+      location.pathname === subItem.path
+        ? "bg-accent-50 text-accent-600"
+        : "text-gray-600 hover:bg-gray-100"
+    }
+  `}
                     >
                       {subItem.name}
                     </NavLink>

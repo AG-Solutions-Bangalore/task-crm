@@ -16,8 +16,8 @@ const SignIn = () => {
   const { toast } = useToast();
   const dispatch = useDispatch();
   const [formData, setFormData] = useState({
-    mobile: "",
-    password: "",
+    mobile: "9360485526",
+    password: "123456",
   });
 
   const handleChange = (e) => {
@@ -105,21 +105,14 @@ const SignIn = () => {
           email: userInfo.user.email,
           last_login: userInfo.user.last_login,
         };
+        console.log("Dispatching user data:", userData);
         dispatch(loginSuccess(userData));
 
-        // const UserInfo = res.data?.data;
-        // localStorage.setItem("token", UserInfo.token);
-        // localStorage.setItem("company_id", UserInfo.user.company_id);
-        // localStorage.setItem("name", UserInfo.user.name);
-        // localStorage.setItem("mobile", UserInfo.user.mobile);
-        // localStorage.setItem("userType", UserInfo.user.user_type);
-        // localStorage.setItem("email", UserInfo.user.email);
-        // localStorage.setItem("last_login", UserInfo.user.last_login);
-        if (userInfo.user.user_type == "1") {
-          navigate("/task");
-        } else {
-          navigate("/home");
-        }
+        console.log(
+          "Navigating to:",
+          userInfo.user.user_type === 1 ? "/task" : "/home"
+        );
+        navigate(userInfo.user.user_type === 1 ? "/task" : "/home");
       } else {
         toast({
           title: "Error",

@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import Loader from "@/components/loader/Loader";
 import ButtonConfigColor from "@/components/buttonComponent/ButtonConfig";
+import useApiToken from "@/components/common/UseToken";
 
 const PROJECT_TYPES = [
   "Marketing",
@@ -61,8 +62,7 @@ const statusOptions = [
   { value: "Completed", label: "Completed" },
 ];
 
-const updateProject = async ({ projectId, projectData }) => {
-  const token = localStorage.getItem("token");
+const updateProject = async ({ projectId, projectData, token }) => {
   const response = await axios.put(
     `${Base_Url}/api/panel-update-project/${projectId}`,
     projectData,
@@ -76,8 +76,7 @@ const updateProject = async ({ projectId, projectData }) => {
   return response.data;
 };
 
-const deleteProjectSub = async (projectSubId) => {
-  const token = localStorage.getItem("token");
+const deleteProjectSub = async ({ projectSubId, token }) => {
   const response = await axios.delete(
     `${Base_Url}/api/panel-delete-project-sub/${projectSubId}`,
     {
@@ -97,6 +96,7 @@ const EditProject = ({ projectId, onSuccess }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [deleteloading, setdeleteLoading] = useState(false);
+  const token = useApiToken();
 
   const [formData, setFormData] = useState({
     project_name: "",
@@ -131,7 +131,6 @@ const EditProject = ({ projectId, onSuccess }) => {
   const fetchProjectData = async () => {
     setIsFetching(true);
     try {
-      const token = localStorage.getItem("token");
       const response = await axios.get(
         `${Base_Url}/api/panel-fetch-project-by-id/${projectId}`,
         {
@@ -287,7 +286,7 @@ const EditProject = ({ projectId, onSuccess }) => {
     setdeleteLoading(true);
 
     if (deleteItemId) {
-      await deleteProjectSubMutation.mutateAsync(deleteItemId);
+      await deleteProjectSubMutation.mutateAsync(deleteItemId, token);
     }
     setDeleteConfirmOpen(false);
     setDeleteItemId(null);
@@ -332,7 +331,11 @@ const EditProject = ({ projectId, onSuccess }) => {
       })),
     };
 
-    updateProjectMutation.mutate({ projectId, projectData: requestData });
+    updateProjectMutation.mutate({
+      projectId,
+      projectData: requestData,
+      token,
+    });
   };
 
   return (

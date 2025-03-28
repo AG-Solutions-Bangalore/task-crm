@@ -5,12 +5,14 @@ import Layout from "@/components/Layout";
 import { Base_Url } from "@/config/BaseUrl";
 import Loader from "@/components/loader/Loader";
 import moment from "moment";
+import useApiToken from "@/components/common/UseToken";
 
 const ProjectReport = () => {
+  const token = useApiToken();
+
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["project"],
     queryFn: async () => {
-      const token = localStorage.getItem("token");
       const response = await axios.post(
         `${Base_Url}/api/panel-fetch-project-list-report`,
         {},
@@ -89,7 +91,7 @@ const ProjectReport = () => {
                             <div key={index}>
                               {moment(date.trim()).format("DD-MM-YYYY")}
                             </div>
-                          )) 
+                          ))
                       : "N/A"}
                   </td>
 
@@ -99,7 +101,7 @@ const ProjectReport = () => {
                           .split(",")
                           .map((status, index) => (
                             <div key={index}>{status.trim()}</div>
-                          )) 
+                          ))
                       : "N/A"}
                   </td>
 

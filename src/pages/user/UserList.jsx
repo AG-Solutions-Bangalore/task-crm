@@ -42,8 +42,10 @@ import EditUserDialog from "@/components/editUserDialog/EditUserDialog";
 import ErrorLoader from "@/components/loader/ErrorLoader";
 import Loader from "@/components/loader/Loader";
 import moment from "moment";
+import useApiToken from "@/components/common/UseToken";
 
 const UserList = () => {
+  const token = useApiToken();
   const {
     data: user,
     isLoading,
@@ -52,7 +54,6 @@ const UserList = () => {
   } = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
-      const token = localStorage.getItem("token");
       const response = await axios.get(
         `${Base_Url}/api/panel-fetch-user-list`,
         {

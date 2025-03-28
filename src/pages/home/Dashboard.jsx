@@ -4,21 +4,22 @@ import { Base_Url } from "@/config/BaseUrl";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import Layout from "../../components/Layout";
+import useApiToken from "@/components/common/UseToken";
+import { useSelector } from "react-redux";
 
 const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [userType, setUserType] = useState(null);
-
+  const token = useApiToken();
+  const storedUserType = useSelector((state) => state.auth.user_type);
   useEffect(() => {
-    const storedUserType = localStorage.getItem("userType");
     setUserType(storedUserType);
 
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem("token");
         const response = await axios.get(
           `${Base_Url}/api/panel-fetch-dashboard`,
           {
@@ -41,7 +42,7 @@ const Dashboard = () => {
   if (loading) {
     return (
       <Layout>
-        <Loader data={"Dashboard"}/>
+        <Loader data={"Dashboard"} />
       </Layout>
     );
   }

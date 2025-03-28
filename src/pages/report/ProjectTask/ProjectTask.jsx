@@ -1,4 +1,5 @@
 import ButtonConfigColor from "@/components/buttonComponent/ButtonConfig";
+import useApiToken from "@/components/common/UseToken";
 import Layout from "@/components/Layout";
 import ErrorLoader from "@/components/loader/ErrorLoader";
 import Loader from "@/components/loader/Loader";
@@ -15,6 +16,7 @@ const ProjectTask = () => {
     project_id: "",
   });
   const containerRef = useRef();
+  const token = useApiToken();
 
   const {
     data: project,
@@ -23,7 +25,6 @@ const ProjectTask = () => {
   } = useQuery({
     queryKey: ["project"],
     queryFn: async () => {
-      const token = localStorage.getItem("token");
       const response = await axios.get(`${Base_Url}/api/panel-fetch-project`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -40,7 +41,6 @@ const ProjectTask = () => {
     queryKey: ["task", formData.project_id],
     queryFn: async () => {
       if (!formData.project_id) return [];
-      const token = localStorage.getItem("token");
       const response = await axios.post(
         `${Base_Url}/api/panel-fetch-project-task-list-report`,
         formData,
@@ -165,9 +165,6 @@ const ProjectTask = () => {
           {Object.entries(groupedByProject).map(
             ([projectName, types], index) => (
               <div key={index} className="mb-6  rounded-lg shadow-lg">
-                {/* <div className="bg-gray-200 print:bg-white text-black p-3 rounded-lg  font-bold text-md border-b-2 border-black first-letter:uppercase lowercase">
-                  {projectName}
-                </div> */}
                 {Object.entries(types).map(
                   ([projectType, tasks], typeIndex) => (
                     <div key={typeIndex} className="mb-4">
@@ -227,7 +224,10 @@ const ProjectTask = () => {
                               <td className="border border-black px-1 py-2">
                                 {project.from_name}
                               </td>
-                              <td className="border border-black px-1 py-2">
+                              <td
+                                className="border border-black px-1 py-2 text-left align-top 
+                               max-w-[50px] overflow-hidden break-words"
+                              >
                                 {project.task_desc}
                               </td>
 

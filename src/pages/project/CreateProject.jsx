@@ -1,4 +1,5 @@
 import ButtonConfigColor from "@/components/buttonComponent/ButtonConfig";
+import useApiToken from "@/components/common/UseToken";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,8 +44,6 @@ const PROJECT_TYPES = [
 ];
 
 const createProject = async (projectData) => {
-  const token = localStorage.getItem("token");
-
   const response = await axios.post(
     `${Base_Url}/api/panel-create-project`,
     projectData,
@@ -62,6 +61,8 @@ const createProject = async (projectData) => {
 const CreateProject = ({ onSuccess }) => {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
+  const token = useApiToken();
+
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     project_name: "",
@@ -197,7 +198,7 @@ const CreateProject = ({ onSuccess }) => {
     };
 
     // Trigger mutation
-    createProjectMutation.mutate(requestData);
+    createProjectMutation.mutate(requestData, token);
   };
 
   return (

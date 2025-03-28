@@ -23,6 +23,10 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Base_Url } from "@/config/BaseUrl";
 import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import useApiToken from "./common/UseToken";
+import { persistor } from "@/redux/store";
+import { logout } from "@/redux/authSlice";
 
 const Navbar = ({
   toggleSidebar,
@@ -36,7 +40,9 @@ const Navbar = ({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const mobileNumber = localStorage.getItem("mobile");
+  const mobileNumber = useSelector((state) => state.auth.mobile);
+  const token = useApiToken();
+  const dispatch = useDispatch();
   const [passwordData, setPasswordData] = useState({
     old_password: "",
     new_password: "",
@@ -58,14 +64,17 @@ const Navbar = ({
       }
     }
   };
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate("/");
 
-    toast({
-      title: "Success",
-      description: "LogOut Successfully",
-    });
+  const handleLogout = async () => {
+    try {
+      await persistor.flush();
+      localStorage.clear();
+      dispatch(logout());
+      navigate("/");
+      setTimeout(() => persistor.purge(), 1000);
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   const handleChangePassword = async (e) => {
@@ -91,7 +100,6 @@ const Navbar = ({
 
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
 
       const response = await axios.post(
         `${Base_Url}/api/panel-change-password`,

@@ -31,24 +31,27 @@ import { ArrowUpDown, ChevronDown, Search } from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 
+import ButtonConfigColor from "@/components/buttonComponent/ButtonConfig";
+import useApiToken from "@/components/common/UseToken";
 import CreateUserDialog from "@/components/createUserDialog/CreateUserDialog";
 import EditUserDialog from "@/components/editUserDialog/EditUserDialog";
 import ErrorLoader from "@/components/loader/ErrorLoader";
 import Loader from "@/components/loader/Loader";
 import { Base_Url } from "@/config/BaseUrl";
 import moment from "moment/moment";
-import ButtonConfigColor from "@/components/buttonComponent/ButtonConfig";
+import { decryptId } from "@/components/common/EncryptionDecryption";
 
 const CompanyView = () => {
   const { id } = useParams();
+  const decrypId = decryptId(id);
+  const token = useApiToken();
 
   // Fetch company data by ID
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ["company", id],
+    queryKey: ["company", decrypId, token],
     queryFn: async () => {
-      const token = localStorage.getItem("token");
       const response = await axios.get(
-        `${Base_Url}/api/panel-fetch-company-by-id/${id}`,
+        `${Base_Url}/api/panel-fetch-company-by-id/${decrypId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

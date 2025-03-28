@@ -37,21 +37,23 @@ import { ChevronDown, Eye, Search } from "lucide-react";
 
 import { useNavigate } from "react-router-dom";
 
+import useApiToken from "@/components/common/UseToken";
 import Layout from "@/components/Layout";
 import ErrorLoader from "@/components/loader/ErrorLoader";
 import Loader from "@/components/loader/Loader";
-import { useToast } from "@/hooks/use-toast";
+import { encryptId } from "@/components/common/EncryptionDecryption";
 
 const CompanyList = () => {
+  const token = useApiToken();
+
   const {
     data: company,
     isLoading,
     isError,
     refetch,
   } = useQuery({
-    queryKey: ["company"],
+    queryKey: ["company", token],
     queryFn: async () => {
-      const token = localStorage.getItem("token");
       const response = await axios.get(
         `${Base_Url}/api/panel-fetch-company-list`,
         {
@@ -127,7 +129,14 @@ const CompanyList = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => navigate(`/company/view/${companyId}`)}
+                    // onClick={() => navigate(`/company/view/${companyId}`)}
+                    onClick={() => {
+                      navigate(
+                        `/company/view/${encodeURIComponent(
+                          encryptId(companyId)
+                        )}`
+                      );
+                    }}
                   >
                     <Eye className="h-4 w-4" />
                   </Button>

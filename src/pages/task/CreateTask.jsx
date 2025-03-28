@@ -25,9 +25,9 @@ import { SquarePlus } from "lucide-react";
 import { Base_Url } from "@/config/BaseUrl";
 import { useToast } from "@/hooks/use-toast";
 import ButtonConfigColor from "@/components/buttonComponent/ButtonConfig";
+import useApiToken from "@/components/common/UseToken";
 
-const fetchProjects = async () => {
-  const token = localStorage.getItem("token");
+const fetchProjects = async (token) => {
   const response = await axios.get(`${Base_Url}/api/panel-fetch-project`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -36,9 +36,8 @@ const fetchProjects = async () => {
   return response.data;
 };
 
-const fetchProjectSub = async (projectId) => {
+const fetchProjectSub = async (projectId, token) => {
   if (!projectId) return [];
-  const token = localStorage.getItem("token");
   const response = await axios.get(
     `${Base_Url}/api/panel-fetch-project-sub/${projectId}`,
     {
@@ -50,8 +49,7 @@ const fetchProjectSub = async (projectId) => {
   return response.data;
 };
 
-const fetchUsers = async () => {
-  const token = localStorage.getItem("token");
+const fetchUsers = async (token) => {
   const response = await axios.get(`${Base_Url}/api/panel-fetch-user`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -60,8 +58,7 @@ const fetchUsers = async () => {
   return response.data;
 };
 
-const createTask = async (taskData) => {
-  const token = localStorage.getItem("token");
+const createTask = async (taskData, token) => {
   const response = await axios.post(
     `${Base_Url}/api/panel-create-task`,
     taskData,
@@ -79,6 +76,7 @@ const CreateTask = ({ onSuccess }) => {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const token = useApiToken();
 
   const [formData, setFormData] = useState({
     project_id: "",
@@ -111,7 +109,7 @@ const CreateTask = ({ onSuccess }) => {
     const loadProjects = async () => {
       setIsLoading((prev) => ({ ...prev, projects: true }));
       try {
-        const data = await fetchProjects();
+        const data = await fetchProjects(token);
         if (data.code === 200) {
           setProjects(data.project || []);
         }
@@ -129,7 +127,7 @@ const CreateTask = ({ onSuccess }) => {
     const loadUsers = async () => {
       setIsLoading((prev) => ({ ...prev, users: true }));
       try {
-        const data = await fetchUsers();
+        const data = await fetchUsers(token);
         if (data.code === 200) {
           setUsers(data.user || []);
         }
@@ -157,7 +155,7 @@ const CreateTask = ({ onSuccess }) => {
 
       setIsLoading((prev) => ({ ...prev, projectSubs: true }));
       try {
-        const data = await fetchProjectSub(formData.project_id);
+        const data = await fetchProjectSub(formData.project_id, token);
         if (data.code === 200) {
           setProjectSubs(data.projectSub || []);
         }
@@ -176,7 +174,8 @@ const CreateTask = ({ onSuccess }) => {
   }, [formData.project_id, toast]);
 
   const createTaskMutation = useMutation({
-    mutationFn: createTask,
+    mutationFn: (taskData) => createTask(taskData, token),
+
     onSuccess: (response) => {
       setLoading(false);
       if (response.code === 200) {
@@ -257,8 +256,7 @@ const CreateTask = ({ onSuccess }) => {
       return;
     }
     setLoading(true);
-
-    createTaskMutation.mutate(formData);
+    createTaskMutation.mutate({ ...formData, token });
   };
 
   return (
