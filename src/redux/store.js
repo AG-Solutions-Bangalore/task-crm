@@ -4,7 +4,7 @@ import storage from "redux-persist/lib/storage";
 import { encryptTransform } from "redux-persist-transform-encrypt";
 import authReducer from "./authSlice";
 const encryptor = encryptTransform({
-  secretKey: import.meta.env.VITE_SECRET_KEY,
+  secretKey: import.meta.env.VITE_SECRET_KEY || "",
   onError: (error) => console.error("Encryption Error:", error),
 });
 
