@@ -180,7 +180,7 @@ const EditProject = ({ projectId, onSuccess }) => {
 
   const updateProjectMutation = useMutation({
     mutationFn: ({ projectId, projectData }) =>
-      updateProject({ projectId, projectData }),
+      updateProject({ projectId, projectData, token }),
     onSuccess: (response) => {
       setLoading(false);
 
