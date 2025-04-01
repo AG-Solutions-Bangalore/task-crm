@@ -14,6 +14,11 @@ import ProjectReport from "@/pages/report/ProjectReport/ProjectReport";
 import UserReport from "@/pages/report/UserReport/UserReport";
 import ProjectTask from "@/pages/report/ProjectTask/ProjectTask";
 import ValidationWrapper from "@/components/common/ValidationWrapper";
+import ViewComponentTask from "@/pages/task/ViewComponentTask";
+import CompletedTaskList from "@/pages/task/CompletedTaskList";
+import FinishedTaskList from "@/pages/task/FinishedTaskList";
+import ProjectDate from "@/pages/report/ProjectDate/ProjectDate";
+import ProjectAssign from "@/pages/report/ProjectAssign/ProjectAssign";
 
 function AppRoutes() {
   return (
@@ -37,6 +42,15 @@ function AppRoutes() {
           <Route path="/project" element={<ProjectList />} />
           {/* task  */}
           <Route path="/task" element={<AllTaskList />} />
+          <Route path="/task-completed" element={<CompletedTaskList />} />
+          <Route path="/task-finished" element={<FinishedTaskList />} />
+          <Route path="/task-project-date" element={<ProjectDate />} />
+          <Route path="/task-project-assign" element={<ProjectAssign />} />
+          <Route path="/task-view-task/:id" element={<ViewComponentTask />} />
+          <Route
+            path="/task-create-comment/:id"
+            element={<ViewComponentTask />}
+          />
           {/* //Reports */}
           <Route path="/report/project" element={<ProjectReport />} />
           <Route path="/report/task" element={<UserReport />} />

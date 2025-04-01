@@ -36,7 +36,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Base_Url } from "@/config/BaseUrl";
+import { Base_Url, NoImage, UserImage } from "@/config/BaseUrl";
 import CreateUserDialog from "@/components/createUserDialog/CreateUserDialog";
 import EditUserDialog from "@/components/editUserDialog/EditUserDialog";
 import ErrorLoader from "@/components/loader/ErrorLoader";
@@ -77,6 +77,48 @@ const UserList = () => {
       accessorKey: "index",
       header: "Sl No",
       cell: ({ row }) => <div>{row.index + 1}</div>,
+    },
+    {
+      accessorKey: "user_image",
+      header: "Image",
+      cell: ({ row }) => {
+        const [isLoading, setIsLoading] = useState(true);
+        const userImageUrl = row.getValue("user_image");
+
+        const handleImageLoad = () => {
+          setIsLoading(false);
+        };
+
+        if (!userImageUrl) {
+          return (
+            <img
+              src={NoImage}
+              alt="User"
+              className="rounded-full w-12 h-12 object-cover"
+              onLoad={handleImageLoad}
+              style={{ display: isLoading ? "none" : "block" }}
+            />
+          );
+        }
+
+        return (
+          <div className="flex items-center justify-center relative">
+            {isLoading && (
+              <div className="absolute flex items-center justify-center">
+                <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
+              </div>
+            )}
+
+            <img
+              src={`${UserImage}/${userImageUrl}`}
+              alt="User"
+              className="rounded-full w-12 h-12 object-cover"
+              onLoad={handleImageLoad}
+              style={{ display: isLoading ? "none" : "block" }}
+            />
+          </div>
+        );
+      },
     },
 
     {

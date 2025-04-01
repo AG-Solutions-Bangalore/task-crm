@@ -1,15 +1,16 @@
-import { Base_Url } from "@/config/BaseUrl";
-import { useToast } from "@/hooks/use-toast";
-import React, { useEffect, useState } from "react";
+import ButtonConfigColor from "@/components/buttonComponent/ButtonConfig";
+import useApiToken from "@/components/common/UseToken";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
   DialogTrigger,
-  DialogDescription,
 } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -23,15 +24,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import axios from "axios";
-import { Edit, Loader2 } from "lucide-react";
+import { Base_Url } from "@/config/BaseUrl";
+import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import ButtonConfigColor from "@/components/buttonComponent/ButtonConfig";
-import useApiToken from "@/components/common/UseToken";
+import axios from "axios";
+import { Edit } from "lucide-react";
 import moment from "moment";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 
 const EditTask = ({ onSuccess, taskId }) => {
   const [open, setOpen] = useState(false);
@@ -41,6 +41,8 @@ const EditTask = ({ onSuccess, taskId }) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const token = useApiToken();
+  const storedUserType = useSelector((state) => state.auth.user_type);
+  const [users, setUsers] = useState([]);
 
   const [formData, setFormData] = useState({
     task_title: "",
@@ -48,6 +50,7 @@ const EditTask = ({ onSuccess, taskId }) => {
     task_due_date: "",
     task_priority: "",
     task_status: "",
+    to_id: "",
   });
 
   // Static options for dropdowns
@@ -63,8 +66,16 @@ const EditTask = ({ onSuccess, taskId }) => {
     { value: "In Process", label: "In Process" },
     { value: "Completed", label: "Completed" },
     { value: "Cancel", label: "Cancel" },
+    ...(storedUserType === 2 ? [{ value: "Finish", label: "Finish" }] : []),
   ];
-
+  const fetchUsers = async (token) => {
+    const response = await axios.get(`${Base_Url}/api/panel-fetch-user`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  };
   const fetchTaskData = async () => {
     setIsFetching(true);
     try {
@@ -81,6 +92,7 @@ const EditTask = ({ onSuccess, taskId }) => {
         task_due_date: taskData.task_due_date,
         task_priority: taskData.task_priority,
         task_status: taskData.task_status,
+        to_id: taskData.to_id ? taskData.to_id.toString() : "",
       });
     } catch (error) {
       toast({
@@ -92,10 +104,28 @@ const EditTask = ({ onSuccess, taskId }) => {
       setIsFetching(false);
     }
   };
+  const loadUsers = async () => {
+    try {
+      const data = await fetchUsers(token);
+      console.log("edit");
+      if (data.code === 200) {
+        setUsers(data.user || []);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch users",
+        variant: "destructive",
+      });
+    }
+  };
 
   useEffect(() => {
-    if (open) {
+    if (open && users) {
       fetchTaskData();
+    }
+    if (open) {
+      loadUsers();
     }
   }, [open]);
 
@@ -112,7 +142,20 @@ const EditTask = ({ onSuccess, taskId }) => {
       task_status: value,
     }));
   };
-
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+  const handleSelectChange = (name, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+  console.log(storedUserType);
   const handleSubmit = async () => {
     if (!formData.task_priority || !formData.task_status) {
       toast({
@@ -122,15 +165,30 @@ const EditTask = ({ onSuccess, taskId }) => {
       });
       return;
     }
+    if (storedUserType == 2) {
+      if (!formData.to_id) {
+        toast({
+          title: "Error",
+          description: "Please select Assign To",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
 
     setIsLoading(true);
+
+    const payload = {
+      task_priority: formData.task_priority,
+      task_status: formData.task_status,
+      task_desc: formData.task_desc,
+      to_id: formData.to_id,
+    };
     try {
       const response = await axios.put(
         `${Base_Url}/api/panel-update-task/${taskId}`,
-        {
-          task_priority: formData.task_priority,
-          task_status: formData.task_status,
-        },
+        payload,
+
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -206,19 +264,41 @@ const EditTask = ({ onSuccess, taskId }) => {
               {formData.task_title}
             </div>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="task_desc" className="text-right">
-              Description
-            </Label>
+          {storedUserType !== 2 && (
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="task_desc" className="text-right">
+                Description
+              </Label>
 
-            <div
-              id="task_desc"
-              className="col-span-3 px-3 py-2 text-sm border rounded-md resize-none overflow-hidden  min-h-[40px]"
-              style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
-            >
-              {formData.task_desc}
+              <div
+                id="task_desc"
+                className="col-span-3 px-3 py-2 text-sm border rounded-md resize-none overflow-hidden  min-h-[40px]"
+                style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
+              >
+                {formData.task_desc}
+              </div>
             </div>
-          </div>
+          )}
+          {storedUserType === 2 && (
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="task_desc" className="text-right">
+                Description
+              </Label>
+              <div className="col-span-3 text-sm">
+                <textarea
+                  id="task_desc"
+                  name="task_desc"
+                  value={formData.task_desc}
+                  onChange={handleInputChange}
+                  className="px-3 py-2 text-sm border rounded-md resize-none min-h-[40px] overflow-hidden w-full"
+                  style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
+                  rows={3}
+                  placeholder="Enter task description..."
+                />
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="task_due_date" className="text-right">
               Due Date
@@ -271,6 +351,29 @@ const EditTask = ({ onSuccess, taskId }) => {
               </SelectContent>
             </Select>
           </div>
+          {storedUserType === 2 && (
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="to_id" className="text-right">
+                Assign To
+              </Label>
+              <Select
+                onValueChange={(value) => handleSelectChange("to_id", value)}
+                value={formData.to_id}
+                disabled={isFetching}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select a user" />
+                </SelectTrigger>
+                <SelectContent>
+                  {users.map((user) => (
+                    <SelectItem key={user.id} value={user.id.toString()}>
+                      {user.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
         <DialogFooter>
           <ButtonConfigColor

@@ -27,7 +27,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Base_Url, TaskImage } from "@/config/BaseUrl";
-import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import {
   flexRender,
@@ -46,15 +45,14 @@ import {
   View,
 } from "lucide-react";
 import moment from "moment";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import CreateTask from "./CreateTask";
 import EditTask from "./EditTask";
 import TaskDialog from "./ImageTask";
-import ViewComponentTask from "./ViewComponentTask";
-import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
 
-const AllTaskList = () => {
+const FinishedTaskList = () => {
   const token = useApiToken();
   const navigate = useNavigate();
   const {
@@ -66,7 +64,7 @@ const AllTaskList = () => {
     queryKey: ["task"],
     queryFn: async () => {
       const response = await axios.get(
-        `${Base_Url}/api/panel-fetch-task-list`,
+        `${Base_Url}/api/panel-fetch-task-finish-list`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -219,7 +217,7 @@ const AllTaskList = () => {
         const imageUrl = taskImg ? `${TaskImage}${taskImg}` : null;
         return (
           <div className="flex flex-row">
-            {userType === 2 && (
+            {/* {userType === 2 && (
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -246,7 +244,7 @@ const AllTaskList = () => {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-            )}
+            )} */}
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -276,7 +274,7 @@ const AllTaskList = () => {
 
             <TaskDialog imageUrl={imageUrl} label="Task Image" />
 
-            <EditTask onSuccess={refetch} taskId={taskId} />
+            {/* <EditTask onSuccess={refetch} taskId={taskId} /> */}
           </div>
         );
       },
@@ -327,14 +325,14 @@ const AllTaskList = () => {
     <Layout>
       <div className="w-full p-4">
         <div className="flex text-left text-2xl text-gray-800 font-[400]">
-          Task List
+          Finished Task List
         </div>
 
         <div className="flex flex-col md:flex-row items-center py-4 gap-4">
           <div className="relative w-full md:w-72">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
             <Input
-              placeholder="Search tasks..."
+              placeholder="Search finished tasks..."
               value={table.getState().globalFilter || ""}
               onChange={(event) => table.setGlobalFilter(event.target.value)}
               className="pl-8 bg-gray-50 border-gray-200 focus:border-gray-300 focus:ring-gray-200"
@@ -484,4 +482,4 @@ const AllTaskList = () => {
   );
 };
 
-export default AllTaskList;
+export default FinishedTaskList;

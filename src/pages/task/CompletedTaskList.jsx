@@ -5,56 +5,54 @@ import Loader from "@/components/loader/Loader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuCheckboxItem,
+    DropdownMenuContent,
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Base_Url, TaskImage } from "@/config/BaseUrl";
-import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import {
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
+    flexRender,
+    getCoreRowModel,
+    getFilteredRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
+    useReactTable,
 } from "@tanstack/react-table";
 import axios from "axios";
 import {
-  ArrowUpDown,
-  ChevronDown,
-  MessageCircleMore,
-  Search,
-  View,
+    ArrowUpDown,
+    ChevronDown,
+    MessageCircleMore,
+    Search,
+    View,
 } from "lucide-react";
 import moment from "moment";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import CreateTask from "./CreateTask";
 import EditTask from "./EditTask";
 import TaskDialog from "./ImageTask";
-import ViewComponentTask from "./ViewComponentTask";
-import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
 
-const AllTaskList = () => {
+const CompletedTaskList = () => {
   const token = useApiToken();
   const navigate = useNavigate();
   const {
@@ -66,7 +64,7 @@ const AllTaskList = () => {
     queryKey: ["task"],
     queryFn: async () => {
       const response = await axios.get(
-        `${Base_Url}/api/panel-fetch-task-list`,
+        `${Base_Url}/api/panel-fetch-task-completed-list`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -327,14 +325,14 @@ const AllTaskList = () => {
     <Layout>
       <div className="w-full p-4">
         <div className="flex text-left text-2xl text-gray-800 font-[400]">
-          Task List
+          Completed Task List
         </div>
 
         <div className="flex flex-col md:flex-row items-center py-4 gap-4">
           <div className="relative w-full md:w-72">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
             <Input
-              placeholder="Search tasks..."
+              placeholder="Search completed tasks..."
               value={table.getState().globalFilter || ""}
               onChange={(event) => table.setGlobalFilter(event.target.value)}
               className="pl-8 bg-gray-50 border-gray-200 focus:border-gray-300 focus:ring-gray-200"
@@ -484,4 +482,4 @@ const AllTaskList = () => {
   );
 };
 
-export default AllTaskList;
+export default CompletedTaskList;

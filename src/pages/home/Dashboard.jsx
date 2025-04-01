@@ -109,6 +109,12 @@ const Dashboard = () => {
       value: dashboardData?.task_cancel_count,
       color: "bg-red-100 text-red-800",
     },
+
+    {
+      title: "Finish",
+      value: dashboardData?.task_finish_count,
+      color: "bg-green-300 text-green-800",
+    },
   ];
 
   return (
@@ -116,7 +122,7 @@ const Dashboard = () => {
       <div className="p-4 space-y-6">
         <h1 className="text-2xl font-bold">Dashboard Overview</h1>
 
-        {/* Always show Projects Section for all user types */}
+        {userType == "2" && (
         <div>
           <h2 className="text-xl font-semibold mb-4">Projects</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -138,31 +144,30 @@ const Dashboard = () => {
             ))}
           </div>
         </div>
+        )}
 
         {/* Conditionally render Tasks Section based on userType */}
-        {userType === "2" && (
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Tasks</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-              {taskCards.map((card, index) => (
-                <Card key={`task-${index}`} className="shadow-sm">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      {card.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div
-                      className={`text-2xl font-bold rounded-full w-12 h-12 flex items-center justify-center ${card.color}`}
-                    >
-                      {card.value}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Tasks</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            {taskCards.map((card, index) => (
+              <Card key={`task-${index}`} className="shadow-sm">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    {card.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div
+                    className={`text-2xl font-bold rounded-full w-12 h-12 flex items-center justify-center ${card.color}`}
+                  >
+                    {card.value}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-        )}
+        </div>
       </div>
     </Layout>
   );

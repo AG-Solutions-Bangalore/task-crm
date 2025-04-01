@@ -62,10 +62,11 @@ const createTask = async (taskData, token) => {
   const response = await axios.post(
     `${Base_Url}/api/panel-create-task`,
     taskData,
+
     {
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+        "Content-Type": "multipart/form-data",
       },
     }
   );
@@ -85,6 +86,7 @@ const CreateTask = ({ onSuccess }) => {
     task_title: "",
     task_desc: "",
     task_due_date: "",
+    task_img: "",
     task_priority: "Medium",
   });
 
@@ -142,9 +144,11 @@ const CreateTask = ({ onSuccess }) => {
       }
     };
 
-    loadProjects();
-    loadUsers();
-  }, [toast]);
+    if (open) {
+      loadProjects();
+      loadUsers();
+    }
+  }, [open]);
 
   useEffect(() => {
     const loadProjectSubs = async () => {
@@ -174,7 +178,7 @@ const CreateTask = ({ onSuccess }) => {
   }, [formData.project_id, toast]);
 
   const createTaskMutation = useMutation({
-    mutationFn: (taskData) => createTask(taskData, token),
+    mutationFn: ({ taskData, token }) => createTask(taskData, token),
 
     onSuccess: (response) => {
       setLoading(false);
@@ -222,6 +226,16 @@ const CreateTask = ({ onSuccess }) => {
       [name]: value,
     }));
   };
+  const handleImageChange = (e) => {
+    const { name, files } = e.target;
+    if (files && files.length > 0) {
+      console.log("File Selected:", files[0]);
+      setFormData((prev) => ({
+        ...prev,
+        [name]: files[0],
+      }));
+    }
+  };
 
   const handleSelectChange = (name, value) => {
     setFormData((prev) => ({
@@ -255,8 +269,30 @@ const CreateTask = ({ onSuccess }) => {
       });
       return;
     }
+
     setLoading(true);
-    createTaskMutation.mutate({ ...formData, token });
+
+    // Create FormData object
+    const formDataToSend = new FormData();
+    formDataToSend.append("project_id", formData.project_id);
+    formDataToSend.append("project_type", formData.project_type);
+    formDataToSend.append("to_id", formData.to_id);
+    formDataToSend.append("task_title", formData.task_title);
+    formDataToSend.append("task_due_date", formData.task_due_date);
+
+    if (formData.task_img instanceof File) {
+      console.log("Appending File:", formData.task_img); // Debugging
+      formDataToSend.append("task_img", formData.task_img);
+    } else {
+      console.error("No valid file found:", formData.task_img);
+    }
+
+    // Ensure FormData has all fields
+    for (let pair of formDataToSend.entries()) {
+      console.log(pair[0], pair[1]);
+    }
+
+    createTaskMutation.mutate({ taskData: formDataToSend, token });
   };
 
   return (
@@ -392,6 +428,18 @@ const CreateTask = ({ onSuccess }) => {
                 onChange={handleInputChange}
                 className="cursor-pointer"
                 min={getMinDate()}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="task_img" className="font-semibold">
+                Task Image *
+              </Label>
+              <Input
+                type="file"
+                id="task_img"
+                name="task_img"
+                onChange={handleImageChange}
+                accept="image/*"
               />
             </div>
 

@@ -17,7 +17,15 @@ import {
 import { useNavigate } from "react-router-dom";
 
 import { useToast } from "@/hooks/use-toast";
-import { CircleUser, LogOut, User } from "lucide-react";
+import {
+  CircleUser,
+  LogOut,
+  Menu,
+  SquareChevronLeft,
+  SquareChevronRight,
+  SquareX,
+  User,
+} from "lucide-react";
 import ButtonConfigColor from "./buttonComponent/ButtonConfig";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
@@ -186,7 +194,7 @@ const Navbar = ({
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors block lg:hidden"
             aria-label="Toggle sidebar"
           >
-            {isSidebarOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
+            {isSidebarOpen ? <SquareX size={20} /> : <Menu size={20} />}
           </button>
           <button
             onClick={toggleCollapse}
@@ -194,9 +202,9 @@ const Navbar = ({
             aria-label="Collapse sidebar"
           >
             {isCollapsed ? (
-              <FaChevronRight size={20} />
+              <SquareChevronRight size={20} />
             ) : (
-              <FaChevronLeft size={20} />
+              <SquareChevronLeft size={20} />
             )}
           </button>
         </div>
