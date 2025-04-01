@@ -1,3 +1,4 @@
+import { NoImage, UserImage } from "@/config/BaseUrl";
 import {
   BookmarkCheck,
   Building2,
@@ -6,6 +7,7 @@ import {
   Folder,
   FolderGit2,
   House,
+  Loader2,
   User,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -15,6 +17,9 @@ import { NavLink, useLocation } from "react-router-dom";
 const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
   const [openSubmenu, setOpenSubmenu] = useState("");
   const [userType, setUserType] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const userImageUrl = useSelector((state) => state.auth.image);
+  console.log(userImageUrl);
   const [userInfo, setUserInfo] = useState({
     name: "",
     lastLogin: "",
@@ -30,6 +35,10 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
       lastLogin: storedLastLogin || "",
     });
   }, []);
+
+  const handleImageLoad = () => {
+    setIsLoading(false);
+  };
 
   const allMenuItems = [
     {
@@ -52,12 +61,23 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
       path: "/project",
       icon: FolderGit2,
     },
+    // {
+    //   name: "Task",
+    //   path: "/task",
+    //   icon: BookmarkCheck,
+    // },
+
     {
       name: "Task",
-      path: "/task",
       icon: BookmarkCheck,
+      subitems: [
+        { name: "Pending Task", path: "/task" },
+        { name: "Completed Task", path: "/task-completed" },
+        ...(storedUserType === 2
+          ? [{ name: "Finished Task", path: "/task-finished" }]
+          : []),
+      ],
     },
-
     {
       name: "Report",
       icon: Folder,
@@ -65,6 +85,8 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
         { name: "Project", path: "/report/project" },
         { name: "Task", path: "/report/task" },
         { name: "Project Task", path: "/report/project/task" },
+        { name: "Project Date", path: "/task-project-date" },
+        { name: "Project Assign", path: "/task-project-assign" },
       ],
     },
   ];
@@ -199,12 +221,24 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
         {/* User info section at the bottom */}
         {!isCollapsed && (
           <div className="p-4 border-t border-gray-200 flex justify-center capitalize">
-            <div className="text-md font-medium text-gray-900">
+            <div className="flex items-center justify-center relative">
+              {isLoading && (
+                <div className="absolute flex items-center justify-center">
+                  <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
+                </div>
+              )}
+
+              <img
+                src={userImageUrl ? `${UserImage}/${userImageUrl}` : NoImage}
+                alt="User"
+                className="rounded-full w-12 h-12 object-cover"
+                onLoad={handleImageLoad}
+                style={{ display: isLoading ? "none" : "block" }}
+              />
+            </div>
+            <div className="text-md font-medium text-gray-900 flex justify-center items-center">
               {userInfo.name}
             </div>
-            {/* <div className="text-xs text-gray-500">
-              Last login: {moment(userInfo.lastLogin).format("DD-MM-YYYY")}
-            </div> */}
           </div>
         )}
       </div>

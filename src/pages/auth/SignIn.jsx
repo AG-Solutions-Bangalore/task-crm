@@ -36,11 +36,10 @@ const SignIn = () => {
     } catch (error) {
       toast({
         title: "Error",
-        description:
-          "Invalid environment detected!",
+        description: "Invalid environment detected!",
         variant: "destructive",
       });
-      return; 
+      return;
     }
 
     // Validation
@@ -116,6 +115,7 @@ const SignIn = () => {
           user_type: userInfo.user.user_type,
           email: userInfo.user.email,
           last_login: userInfo.user.last_login,
+          image: userInfo.user.user_image,
         };
         console.log("Dispatching user data:", userData);
         dispatch(loginSuccess(userData));

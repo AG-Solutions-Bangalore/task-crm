@@ -148,7 +148,7 @@ const UserReport = () => {
           <div className="grid grid-cols-1 gap-4 mb-5">
             <div>
               <Label htmlFor="to_id" className="font-semibold">
-                To Id
+                Assign To
               </Label>
               <select
                 id="to_id"
@@ -193,19 +193,24 @@ const UserReport = () => {
                               Title
                             </th>
                             <th className="border border-black px-1 py-2">
-                              Created
+                              Description
                             </th>
                             <th className="border border-black px-1 py-2">
                               From
                             </th>
+
                             <th className="border border-black px-1 py-2">
-                              Description
+                              Created
                             </th>
+
                             <th className="border border-black px-1 py-2">
                               Due Date
                             </th>
                             <th className="border border-black px-1 py-2">
                               Priority
+                            </th>
+                            <th className="border border-black px-1 py-2">
+                              Updated Date
                             </th>
                             <th className="border border-black px-1 py-2">
                               Status
@@ -221,20 +226,7 @@ const UserReport = () => {
                               <td className="border border-black px-1 py-2">
                                 {project.task_title}
                               </td>
-
-                              <td className="border border-black px-1 py-2">
-                                {project.task_created
-                                  ? moment(project.task_created).format(
-                                      "DD-MM-YYYY"
-                                    )
-                                  : ""}
-                              </td>
-
-                              <td className="border border-black px-1 py-2">
-                                {project.from_name}
-                              </td>
                               <td
-                                // className="border border-black px-1 py-2"
                                 className="border border-black px-1 py-2 text-left align-top 
                                max-w-[200px] overflow-hidden break-words"
                                 style={{
@@ -243,6 +235,17 @@ const UserReport = () => {
                                 }}
                               >
                                 {project.task_desc}
+                              </td>
+                              <td className="border border-black px-1 py-2">
+                                {project.from_name}
+                              </td>
+
+                              <td className="border border-black px-1 py-2">
+                                {project.task_created
+                                  ? moment(project.task_created).format(
+                                      "DD-MM-YYYY"
+                                    )
+                                  : ""}
                               </td>
 
                               <td className="border border-black px-1 py-2">
@@ -254,6 +257,14 @@ const UserReport = () => {
                               </td>
                               <td className="border border-black px-1 py-2">
                                 {project.task_priority}
+                              </td>
+
+                              <td className="border border-black px-1 py-2">
+                                {project.task_updated
+                                  ? moment(project.task_updated).format(
+                                      "DD-MM-YYYY"
+                                    )
+                                  : ""}
                               </td>
                               <td className="border border-black px-1 py-2 font-semibold">
                                 {project.task_status}

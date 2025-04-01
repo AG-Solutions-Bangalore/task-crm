@@ -3,6 +3,7 @@ import useApiToken from "@/components/common/UseToken";
 import Layout from "@/components/Layout";
 import ErrorLoader from "@/components/loader/ErrorLoader";
 import Loader from "@/components/loader/Loader";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Base_Url } from "@/config/BaseUrl";
 import { useQuery } from "@tanstack/react-query";
@@ -11,26 +12,12 @@ import moment from "moment";
 import { useEffect, useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 
-const ProjectTask = () => {
+const ProjectDate = () => {
   const [formData, setFormData] = useState({
-    project_id: "",
+    task_updated: moment().format("YYYY-MM-DD"),
   });
   const containerRef = useRef();
   const token = useApiToken();
-
-  const {
-    data: project,
-    isLoading: usersLoading,
-    isError: usersError,
-  } = useQuery({
-    queryKey: ["project"],
-    queryFn: async () => {
-      const response = await axios.get(`${Base_Url}/api/panel-fetch-project`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      return response.data.project;
-    },
-  });
 
   const {
     data: task,
@@ -38,11 +25,12 @@ const ProjectTask = () => {
     isError,
     refetch,
   } = useQuery({
-    queryKey: ["task", formData.project_id],
+    queryKey: ["task", formData.task_updated],
     queryFn: async () => {
-      if (!formData.project_id) return [];
+      if (!formData.task_updated) return [];
       const response = await axios.post(
-        `${Base_Url}/api/panel-fetch-project-task-list-report`,
+        `${Base_Url}/api/panel-fetch-project-task-datewise-list-report
+`,
         formData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -51,10 +39,10 @@ const ProjectTask = () => {
     enabled: false,
   });
   useEffect(() => {
-    if (formData.project_id) {
+    if (formData.task_updated) {
       refetch();
     }
-  }, [formData.project_id, refetch]);
+  }, [formData.task_updated, refetch]);
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -102,7 +90,7 @@ const ProjectTask = () => {
     `,
   });
 
-  if (isLoading || usersLoading) {
+  if (isLoading) {
     return (
       <Layout>
         <Loader data={"Project Task Report"} />
@@ -111,7 +99,7 @@ const ProjectTask = () => {
   }
 
   // Render error state
-  if (isError || usersError) {
+  if (isError) {
     return (
       <Layout>
         <ErrorLoader onSuccess={refetch} />
@@ -122,7 +110,7 @@ const ProjectTask = () => {
     <Layout>
       <div className="overflow-x-auto p-4">
         <div className="flex justify-between">
-          <h2 className="text-2xl">Project Task Report</h2>
+          <h2 className="text-2xl">Project Date Report </h2>
 
           <ButtonConfigColor
             type="button"
@@ -134,23 +122,16 @@ const ProjectTask = () => {
         <form>
           <div className="grid grid-cols-1 gap-4 mb-5">
             <div>
-              <Label htmlFor="project_id" className="font-semibold">
+              <Label htmlFor="task_updated" className="font-semibold">
                 Project Name
               </Label>
-              <select
-                id="project_id"
-                name="project_id"
-                value={formData.project_id}
+              <Input
+                type="date"
+                id="task_updated"
+                name="task_updated"
+                value={formData.task_updated}
                 onChange={handleInputChange}
-                className="border rounded-md p-2 w-full"
-              >
-                <option value="">Select a Project Id</option>
-                {project?.map((project) => (
-                  <option key={project.id} value={project.id}>
-                    {project.project_name}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
           </div>
         </form>
@@ -174,6 +155,9 @@ const ProjectTask = () => {
                       <table className="w-full border border-black">
                         <thead className="bg-gray-300 print:bg-white text-black text-xs print:text-[10px]">
                           <tr>
+                            <th className="border border-black px-1 py-2">
+                              Project Name{" "}
+                            </th>
                             <th className="border border-black px-1 py-2">
                               Title
                             </th>
@@ -210,6 +194,9 @@ const ProjectTask = () => {
                               key={idx}
                               className="text-center border border-black hover:bg-gray-200 transition-all duration-200 text-xs print:text-[10px]"
                             >
+                              <td className="border border-black px-1 py-2">
+                                {project.project_name}
+                              </td>
                               <td className="border border-black px-1 py-2">
                                 {project.task_title}
                               </td>
@@ -275,4 +262,4 @@ const ProjectTask = () => {
   );
 };
 
-export default ProjectTask;
+export default ProjectDate;

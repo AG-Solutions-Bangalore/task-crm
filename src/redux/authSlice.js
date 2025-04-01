@@ -9,6 +9,7 @@ const initialState = {
   user_type: null,
   email: null,
   last_login: null,
+  image: null,
 };
 
 const authSlice = createSlice({
@@ -19,6 +20,7 @@ const authSlice = createSlice({
       state.token = action.payload.token;
       state.company_id = action.payload.company_id;
       state.id = action.payload.id;
+      state.image = action.payload.image;
       state.mobile = action.payload.mobile;
       state.name = action.payload.name;
       state.user_type = action.payload.user_type;
