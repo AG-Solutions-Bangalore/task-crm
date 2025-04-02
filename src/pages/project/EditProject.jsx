@@ -298,8 +298,7 @@ const EditProject = ({ projectId, onSuccess }) => {
     if (
       !formData.project_name ||
       !formData.client_name ||
-      !projectData[0].project_type ||
-      !projectData[0].project_due_date
+      !projectData[0].project_type 
     ) {
       toast({
         title: "Error",
@@ -310,10 +309,10 @@ const EditProject = ({ projectId, onSuccess }) => {
     }
 
     for (const item of projectData) {
-      if (!item.project_type || !item.project_due_date) {
+      if (!item.project_type ) {
         toast({
           title: "Error",
-          description: "All project types and due dates must be filled",
+          description: "All project types  must be filled",
           variant: "destructive",
         });
         return;
