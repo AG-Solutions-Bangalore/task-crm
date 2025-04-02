@@ -12,7 +12,6 @@ import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
 import { useState } from "react";
 
-
 import { Base_Url } from "@/config/BaseUrl";
 import { useLocation } from "react-router-dom";
 import ButtonConfigColor from "../buttonComponent/ButtonConfig";
@@ -29,6 +28,7 @@ const CreateUserDialog = ({ onSuccess }) => {
     name: "",
     mobile: "",
     email: "",
+    user_image: "",
   });
 
   const handleInputChange = (e) => {
@@ -38,7 +38,16 @@ const CreateUserDialog = ({ onSuccess }) => {
       [name]: value,
     }));
   };
-
+  const handleImageChange = (e) => {
+    const { name, files } = e.target;
+    if (files && files.length > 0) {
+      console.log("File Selected:", files[0]);
+      setFormData((prev) => ({
+        ...prev,
+        [name]: files[0],
+      }));
+    }
+  };
   const handleSubmit = async () => {
     if (!formData.name || !formData.mobile || !formData.email) {
       toast({
@@ -51,11 +60,19 @@ const CreateUserDialog = ({ onSuccess }) => {
 
     setIsLoading(true);
     try {
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.name);
+      formDataToSend.append("email", formData.email);
+      formDataToSend.append("mobile", formData.mobile);
+      formDataToSend.append("user_image", formData.user_image);
       const response = await axios.post(
         `${Base_Url}/api/panel-create-user`,
-        formData,
+        formDataToSend,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
         }
       );
 
@@ -163,6 +180,19 @@ const CreateUserDialog = ({ onSuccess }) => {
               onChange={handleInputChange}
               placeholder="Enter email"
               type="email"
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="email"> Task Image</Label>
+
+            <Input
+              type="file"
+              id="user_image"
+              name="user_image"
+              onChange={handleImageChange}
+              accept="image/*"
+              className="col-span-3"
             />
           </div>
         </div>

@@ -19,7 +19,6 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
   const [userType, setUserType] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const userImageUrl = useSelector((state) => state.auth.image);
-  console.log(userImageUrl);
   const [userInfo, setUserInfo] = useState({
     name: "",
     lastLogin: "",
@@ -192,14 +191,6 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
                       key={subItem.name}
                       to={subItem.path}
                       onClick={handleLinkClick}
-                      //   className={({ isActive }) => `
-                      //   py-2 px-3 text-sm rounded-lg block transition-colors
-                      //   ${
-                      //     isActive
-                      //       ? "bg-accent-50 text-accent-600"
-                      //       : "text-gray-600 hover:bg-gray-100"
-                      //   }
-                      // `}
                       className={() => `
     py-2 px-3 text-sm rounded-lg block transition-colors
     ${
@@ -222,7 +213,7 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
         {!isCollapsed && (
           <div className="p-4 border-t border-gray-200 flex justify-center capitalize">
             <div className="flex items-center justify-center relative">
-              {isLoading && (
+            {isLoading && (
                 <div className="absolute flex items-center justify-center">
                   <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
                 </div>

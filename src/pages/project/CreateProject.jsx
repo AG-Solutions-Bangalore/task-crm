@@ -43,7 +43,7 @@ const PROJECT_TYPES = [
   "Festive Posts",
 ];
 
-const createProject = async (projectData) => {
+const createProject = async (projectData, token) => {
   const response = await axios.post(
     `${Base_Url}/api/panel-create-project`,
     projectData,
@@ -78,7 +78,9 @@ const CreateProject = ({ onSuccess }) => {
   ]);
 
   const createProjectMutation = useMutation({
-    mutationFn: createProject,
+    // mutationFn: createProject,
+    mutationFn: ({ taskData, token }) => createProject(taskData, token),
+
     onSuccess: (response) => {
       setLoading(false);
       if (response.code === 200) {
@@ -168,8 +170,7 @@ const CreateProject = ({ onSuccess }) => {
     if (
       !formData.project_name ||
       !formData.client_name ||
-      !projectData[0].project_type ||
-      !projectData[0].project_due_date
+      !projectData[0].project_type
     ) {
       toast({
         title: "Error",
@@ -180,10 +181,10 @@ const CreateProject = ({ onSuccess }) => {
     }
 
     for (const item of projectData) {
-      if (!item.project_type || !item.project_due_date) {
+      if (!item.project_type ) {
         toast({
           title: "Error",
-          description: "All project types and due dates must be filled",
+          description: "All project types  must be filled",
           variant: "destructive",
         });
         return;
@@ -198,7 +199,7 @@ const CreateProject = ({ onSuccess }) => {
     };
 
     // Trigger mutation
-    createProjectMutation.mutate(requestData, token);
+    createProjectMutation.mutate({ taskData: requestData, token });
   };
 
   return (

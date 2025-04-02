@@ -43,6 +43,8 @@ import ErrorLoader from "@/components/loader/ErrorLoader";
 import Loader from "@/components/loader/Loader";
 import moment from "moment";
 import useApiToken from "@/components/common/UseToken";
+import TaskDialog from "../task/ImageTask";
+import ImageDialog from "./ImageDialog";
 
 const UserList = () => {
   const token = useApiToken();
@@ -78,45 +80,97 @@ const UserList = () => {
       header: "Sl No",
       cell: ({ row }) => <div>{row.index + 1}</div>,
     },
+    // {
+    //   accessorKey: "user_image",
+    //   header: "Image",
+    //   cell: ({ row }) => {
+    //     const [isLoading, setIsLoading] = useState(true);
+    //     const userImageUrl = row.getValue("user_image");
+
+    //     const handleImageLoad = () => {
+    //       setIsLoading(false);
+    //     };
+
+    //     if (!userImageUrl) {
+    //       return (
+    //         <img
+    //           src={NoImage}
+    //           alt="User"
+    //           className="rounded-full w-12 h-12 object-cover"
+    //           onLoad={handleImageLoad}
+    //           style={{ display: isLoading ? "none" : "block" }}
+    //         />
+    //       );
+    //     }
+
+    //     return (
+    //       <div className="flex items-center justify-center relative">
+    //         {isLoading && (
+    //           <div className="absolute flex items-center justify-center">
+    //             <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
+    //           </div>
+    //         )}
+
+    //         <img
+    //           src={`${UserImage}/${userImageUrl}`}
+    //           alt="User"
+    //           className="rounded-full w-12 h-12 object-cover"
+    //           onLoad={handleImageLoad}
+    //           style={{ display: isLoading ? "none" : "block" }}
+    //         />
+    //       </div>
+    //     );
+    //   },
+    // },
+
     {
       accessorKey: "user_image",
       header: "Image",
       cell: ({ row }) => {
         const [isLoading, setIsLoading] = useState(true);
+        const [isDialogOpen, setIsDialogOpen] = useState(false);
         const userImageUrl = row.getValue("user_image");
+        const userName = row.getValue("name");
 
         const handleImageLoad = () => {
           setIsLoading(false);
         };
 
-        if (!userImageUrl) {
-          return (
-            <img
-              src={NoImage}
-              alt="User"
-              className="rounded-full w-12 h-12 object-cover"
-              onLoad={handleImageLoad}
-              style={{ display: isLoading ? "none" : "block" }}
-            />
-          );
-        }
+        const handleImageClick = () => {
+          if (userImageUrl) {
+            setIsDialogOpen(true);
+          }
+        };
 
         return (
-          <div className="flex items-center justify-center relative">
-            {isLoading && (
-              <div className="absolute flex items-center justify-center">
-                <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
-              </div>
-            )}
+          <>
+            <div className="flex items-center justify-center relative">
+              {isLoading && (
+                <div className="absolute flex items-center justify-center">
+                  <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
+                </div>
+              )}
 
-            <img
-              src={`${UserImage}/${userImageUrl}`}
-              alt="User"
-              className="rounded-full w-12 h-12 object-cover"
-              onLoad={handleImageLoad}
-              style={{ display: isLoading ? "none" : "block" }}
-            />
-          </div>
+              <img
+                src={userImageUrl ? `${UserImage}/${userImageUrl}` : NoImage}
+                alt="User"
+                className="rounded-full w-12 h-12 object-cover cursor-pointer"
+                onLoad={handleImageLoad}
+                onClick={handleImageClick}
+                style={{ display: isLoading ? "none" : "block" }}
+              />
+            </div>
+
+            {/* TaskDialog Component */}
+            {isDialogOpen && (
+              <ImageDialog
+                imageUrl={`${UserImage}/${userImageUrl}`}
+                label={userName}
+                isDialogOpen={isDialogOpen}
+                setIsDialogOpen={setIsDialogOpen}
+              />
+            )}
+          </>
         );
       },
     },
