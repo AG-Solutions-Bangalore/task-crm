@@ -16,10 +16,13 @@ import { Base_Url } from "@/config/BaseUrl";
 import { useLocation } from "react-router-dom";
 import ButtonConfigColor from "../buttonComponent/ButtonConfig";
 import useApiToken from "../common/UseToken";
+import { XCircle } from "lucide-react";
 
 const CreateUserDialog = ({ onSuccess }) => {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [image, setImage] = useState(null);
+
   const { toast } = useToast();
   const { pathname } = useLocation();
   const token = useApiToken();
@@ -86,7 +89,9 @@ const CreateUserDialog = ({ onSuccess }) => {
           name: "",
           mobile: "",
           email: "",
+          image: null,
         });
+        setImage(null);
         if (onSuccess) onSuccess();
         setOpen(false);
       } else {
@@ -106,14 +111,34 @@ const CreateUserDialog = ({ onSuccess }) => {
       setIsLoading(false);
     }
   };
+  const handlePaste = (e) => {
+    const items = e.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type.indexOf("image") === 0) {
+        const file = item.getAsFile();
+        if (file) {
+          setImage(URL.createObjectURL(file));
+          setFormData((prev) => ({
+            ...prev,
+            user_image: file,
+          }));
+        }
+      }
+    }
+  };
+  const handleRemoveImage = () => {
+    setImage(null);
+    setFormData((prev) => ({
+      ...prev,
+      user_image: null,
+    }));
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {pathname.startsWith("/company/view") || pathname === "/user" ? (
-          // <Button variant="default" className={`ml-2 `}>
-          //   <SquarePlus className="h-4 w-4" /> User
-          // </Button>
-
           <ButtonConfigColor
             type="button"
             buttontype="create"
@@ -122,29 +147,23 @@ const CreateUserDialog = ({ onSuccess }) => {
           />
         ) : pathname === "/create-contract" ||
           pathname === "/create-invoice" ? (
-          // <p className="text-xs text-blue-600  hover:text-red-800 cursor-pointer">
-          //   <span className="flex items-center flex-row gap-1">
-          //     <SquarePlus className="w-4 h-4" /> <span>Add</span>
-          //   </span>
-
           <ButtonConfigColor
             type="button"
             buttontype="create"
             label="Add"
             className="ml-2"
           />
-        ) : // </p>
-        null}
+        ) : null}
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-md" aria-describedby={undefined}>
         <DialogHeader>
-          <DialogTitle>Create New User</DialogTitle>
+          <DialogTitle>Create New User </DialogTitle>
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">Name *</Label>
             <Input
               id="name"
               name="name"
@@ -155,7 +174,7 @@ const CreateUserDialog = ({ onSuccess }) => {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="mobile">Mobile</Label>
+            <Label htmlFor="mobile">Mobile *</Label>
             <Input
               id="mobile"
               name="mobile"
@@ -172,7 +191,7 @@ const CreateUserDialog = ({ onSuccess }) => {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">Email *</Label>
             <Input
               id="email"
               name="email"
@@ -183,7 +202,7 @@ const CreateUserDialog = ({ onSuccess }) => {
             />
           </div>
 
-          <div className="grid gap-2">
+          {/* <div className="grid gap-2">
             <Label htmlFor="email"> Task Image</Label>
 
             <Input
@@ -194,6 +213,33 @@ const CreateUserDialog = ({ onSuccess }) => {
               accept="image/*"
               className="col-span-3"
             />
+          </div> */}
+          <div className="grid gap-2">
+            <Label htmlFor="email"> Image</Label>
+
+            <div
+              onPaste={handlePaste}
+              className=" col-span-3 w-full min-h-[120px] flex items-center justify-center border  border-gray-200 text-gray-500 text-sm rounded-md  transition-all"
+              onClick={() => document.getElementById("user_image").click()}
+            >
+              {image ? (
+                <div className="relative w-full flex justify-center">
+                  <img
+                    src={image}
+                    alt="Uploaded or Pasted"
+                    className="max-h-40 object-contain rounded-md"
+                  />
+                  <button
+                    onClick={handleRemoveImage}
+                    className="absolute top-1 right-1 bg-white rounded-full p-1 shadow-md  transition-all"
+                  >
+                    <XCircle className="w-5 h-5 text-gray-600 " />
+                  </button>
+                </div>
+              ) : (
+                <span>Paste an image here</span>
+              )}
+            </div>
           </div>
         </div>
 

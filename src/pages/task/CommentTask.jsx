@@ -1,34 +1,29 @@
-import React, { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import TaskDialog from "./ImageTask";
-import moment from "moment";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import ButtonConfigColor from "@/components/buttonComponent/ButtonConfig";
-import { Base_Url, CommnentImage } from "@/config/BaseUrl";
 import useApiToken from "@/components/common/UseToken";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Base_Url } from "@/config/BaseUrl";
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
+import { XCircle } from "lucide-react";
+import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
-const CommentTask = ({ commentData, id }) => {
+const CommentTask = ({ id, fetchTaskData }) => {
   const location = useLocation();
   const [loading, setLoading] = useState(false);
   const token = useApiToken();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [image, setImage] = useState(null);
+
   const [formData, setFormData] = useState({
     task_id: "",
     task_comment: "",
     task_comment_img: "",
   });
-  const isCreateCommentPage = location.pathname.startsWith(
-    "/task-create-comment/"
-  );
-  const latestComment =
-    isCreateCommentPage && commentData?.length > 0
-      ? commentData[commentData.length - 1]
-      : null;
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     console.log(value);
@@ -47,7 +42,29 @@ const CommentTask = ({ commentData, id }) => {
       }));
     }
   };
-
+  const handlePaste = (e) => {
+    const items = e.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type.indexOf("image") === 0) {
+        const file = item.getAsFile();
+        if (file) {
+          setImage(URL.createObjectURL(file));
+          setFormData((prev) => ({
+            ...prev,
+            task_comment_img: file,
+          }));
+        }
+      }
+    }
+  };
+  const handleRemoveImage = () => {
+    setImage(null);
+    setFormData((prev) => ({
+      ...prev,
+      task_comment_img: null,
+    }));
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!id || !formData.task_comment) {
@@ -86,7 +103,9 @@ const CommentTask = ({ commentData, id }) => {
           title: "Success",
           description: response.data.msg || "Comment submitted successfully",
         });
-        setFormData({ task_comment: "", task_comment_img: null }); // Reset form
+        fetchTaskData();
+        setFormData({ task_comment: "", task_comment_img: null });
+        setImage(null);
       } else {
         toast({
           title: "Error",
@@ -108,119 +127,81 @@ const CommentTask = ({ commentData, id }) => {
 
   return (
     <>
-      <div className="mt-6">
-        <h3 className="font-semibold text-lg">Task Comments</h3>
-        {commentData?.length > 0 ? (
-          <div className="space-y-4 mt-4">
-            {isCreateCommentPage && latestComment ? (
+      <div>
+        <form onSubmit={handleSubmit}>
+          <div className="grid grid-cols-2 gap-4 my-4">
+            <div>
+              <Label htmlFor="task_comment" className="font-semibold">
+                Task Comment *
+              </Label>
+              <Textarea
+                id="task_comment"
+                name="task_comment"
+                value={formData.task_comment}
+                onChange={handleInputChange}
+                placeholder="Enter task description"
+                className="min-h-24"
+              />
+            </div>
+
+            {/* <div>
+              <Label htmlFor="task_comment_img" className="font-semibold">
+                Task Image
+              </Label>
+              <Input
+                type="file"
+                id="task_comment_img"
+                name="task_comment_img"
+                onChange={handleImageChange}
+                accept="image/*"
+              />
+            </div> */}
+            <div>
+              <Label htmlFor="task_comment_img"> Image</Label>
+
               <div
-                key={latestComment.id}
-                className="p-4 bg-gray-100 rounded-md shadow-sm"
+                onPaste={handlePaste}
+                className=" col-span-3 w-full min-h-24 flex items-center justify-center border  border-gray-200 text-gray-500 text-sm rounded-md  transition-all"
+                onClick={() =>
+                  document.getElementById("task_comment_img").click()
+                }
               >
-                <div className="flex items-center  h-full text-xs text-gray-500">
-                  <div className="text-xs text-gray-500 ">
-                    {latestComment.task_comment_date
-                      ? moment(latestComment.task_comment_date).format(
-                          "DD-MM-YYYY"
-                        )
-                      : "No date available."}
+                {image ? (
+                  <div className="relative w-full flex justify-center">
+                    <img
+                      src={image}
+                      alt="Uploaded or Pasted"
+                      className="max-h-40 object-contain rounded-md"
+                    />
+                    <button
+                      onClick={handleRemoveImage}
+                      className="absolute top-1 right-1 bg-white rounded-full p-1 shadow-md  transition-all"
+                    >
+                      <XCircle className="w-5 h-5 text-gray-600 " />
+                    </button>
                   </div>
-                  <TaskDialog
-                    imageUrl={`${CommnentImage}${latestComment.task_comment_img}`}
-                    label="Comment Image"
-                  />
-                </div>
-
-                <div className="text-sm text-gray-700">
-                  {latestComment.task_comment || "No comment available."}
-                </div>
+                ) : (
+                  <span>Paste an image here</span>
+                )}
               </div>
-            ) : (
-              <div className="mt-6 max-h-80 overflow-y-auto">
-                <div className="space-y-4 mt-4">
-                  {commentData
-                    .slice()
-                    .sort((a, b) => b.id - a.id)
-                    .map((commentItem) => (
-                      <div
-                        key={commentItem.id}
-                        className="p-4 bg-gray-100 rounded-md shadow-sm"
-                      >
-                        <div className="flex items-center  h-full text-xs text-gray-500">
-                          <div className="text-xs text-gray-500">
-                            {commentItem.task_comment_date
-                              ? moment(commentItem.task_comment_date).format(
-                                  "DD-MM-YYYY"
-                                )
-                              : "No date available."}
-                          </div>
-                          {commentItem.task_comment_img != null && (
-                            <TaskDialog
-                              imageUrl={`${CommnentImage}${commentItem.task_comment_img}`}
-                              label="Comment Image"
-                            />
-                          )}
-                        </div>
-
-                        <div className="text-sm text-gray-700">
-                          {commentItem.task_comment || "No comment available."}
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              </div>
-            )}
+            </div>
           </div>
-        ) : (
-          <h2 className="flex justify-center">There is No Previous Comment</h2>
-        )}
-        {location.pathname.startsWith("/task-create-comment/") && (
-          <form onSubmit={handleSubmit}>
-            <div className="grid gap-4 my-4">
-              <div>
-                <Label htmlFor="task_comment" className="font-semibold">
-                  Task Comment *
-                </Label>
-                <Textarea
-                  id="task_comment"
-                  name="task_comment"
-                  value={formData.task_comment}
-                  onChange={handleInputChange}
-                  placeholder="Enter task description"
-                  className="min-h-24"
-                />
-              </div>
 
-              <div>
-                <Label htmlFor="task_comment_img" className="font-semibold">
-                  Task Image
-                </Label>
-                <Input
-                  type="file"
-                  id="task_comment_img"
-                  name="task_comment_img"
-                  onChange={handleImageChange}
-                  accept="image/*"
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-center space-x-3">
-              <ButtonConfigColor
-                loading={loading}
-                type="submit"
-                buttontype="submit"
-                label={loading ? "Creating..." : "Create Comment"}
-              />
-              <ButtonConfigColor
-                type="button"
-                buttontype="back"
-                label="Back"
-                onClick={() => navigate(-1)}
-              />
-            </div>
-          </form>
-        )}
+          <div className="flex justify-center space-x-3">
+            <ButtonConfigColor
+              loading={loading}
+              type="submit"
+              buttontype="submit"
+              label={loading ? "Creating..." : "Create Comment"}
+            />
+            <ButtonConfigColor
+              type="button"
+              buttontype="back"
+              label="Back"
+              onClick={() => navigate(-1)}
+            />
+          </div>
+        </form>
       </div>
     </>
   );

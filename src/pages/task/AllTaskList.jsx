@@ -27,7 +27,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Base_Url, TaskImage } from "@/config/BaseUrl";
-import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import {
   flexRender,
@@ -46,13 +45,13 @@ import {
   View,
 } from "lucide-react";
 import moment from "moment";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import CreateTask from "./CreateTask";
 import EditTask from "./EditTask";
 import TaskDialog from "./ImageTask";
-import ViewComponentTask from "./ViewComponentTask";
-import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { encryptId } from "@/components/common/EncryptionDecryption";
 
 const AllTaskList = () => {
   const token = useApiToken();
@@ -81,7 +80,6 @@ const AllTaskList = () => {
   const [columnVisibility, setColumnVisibility] = useState({});
   const [rowSelection, setRowSelection] = useState({});
   const [projectTypeFilter, setProjectTypeFilter] = useState("all");
-  const userType = useSelector((state) => state.auth.user_type);
   const projectTypesWithCounts = useMemo(() => {
     if (!task) return [];
 
@@ -115,6 +113,12 @@ const AllTaskList = () => {
     Completed: "bg-green-500 text-white", // Green
     Finish: "bg-green-700 text-white", // Darker Green to differentiate from Completed
     default: "bg-gray-500 text-white", // Slightly darker Gray for better visibility
+  };
+  const PriporitystatusColors = {
+    Low: "bg-yellow-400 text-black", // Brighter Yellow for readability
+    Medium: "bg-blue-500 text-black", // Blue
+    High: "bg-orange-500 text-black", // oranage
+    default: "bg-gray-500 text-black", // Slightly darker Gray for better visibility
   };
 
   const columns = [
@@ -188,11 +192,31 @@ const AllTaskList = () => {
       },
     },
     {
-      accessorKey: "task_priority",
-      header: "Priority",
-      cell: ({ row }) => <div>{row.getValue("task_priority")}</div>,
+      accessorKey: "task_updated",
+      header: "Updated",
+      cell: ({ row }) => {
+        const date = row.getValue("task_updated");
+        return <div>{date ? moment(date).format("DD-MM-YYYY") : "N/A"}</div>;
+      },
     },
 
+    {
+      accessorKey: "task_priority",
+      header: "Priority",
+      cell: ({ row }) => {
+        const status = row.getValue("task_priority");
+        if (status == null) return null;
+        return (
+          <span
+            className={`rounded-md px-2 py-1 text-sm resize-none overflow-hidden  ${
+              PriporitystatusColors[status] || PriporitystatusColors.default
+            }`}
+          >
+            {status}
+          </span>
+        );
+      },
+    },
     {
       accessorKey: "task_status",
       header: "Status",
@@ -219,34 +243,6 @@ const AllTaskList = () => {
         const imageUrl = taskImg ? `${TaskImage}${taskImg}` : null;
         return (
           <div className="flex flex-row">
-            {userType === 2 && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className={`transition-all duration-200 hover:bg-blue-50`}
-                      onClick={() =>
-                        navigate(`/task-create-comment/${taskId}`, {
-                          state: {
-                            label: "Create Comment",
-                            comment: true,
-                          },
-                        })
-                      }
-                    >
-                      <MessageCircleMore
-                        className={`h-4 w-4 transition-all duration-200 hover:text-blue-500`}
-                      />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Create Comment</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -254,27 +250,27 @@ const AllTaskList = () => {
                     variant="ghost"
                     size="icon"
                     className={`transition-all duration-200 hover:bg-blue-50`}
-                    onClick={() =>
-                      navigate(`/task-view-task/${taskId}`, {
-                        state: {
-                          label: "View Task",
-                          comment: true,
-                        },
-                      })
-                    }
+                    // onClick={() => navigate(`/task-create-comment/${taskId}`)}
+                    onClick={() => {
+                      navigate(
+                        `/task-create-comment/${encodeURIComponent(
+                          encryptId(taskId)
+                        )}`
+                      );
+                    }}
                   >
-                    <View
+                    <MessageCircleMore
                       className={`h-4 w-4 transition-all duration-200 hover:text-blue-500`}
                     />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>View Task</p>
+                  <p>Create Comment</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
 
-            <TaskDialog imageUrl={imageUrl} label="Task Image" />
+            {/* <TaskDialog imageUrl={imageUrl} label="Task Image" /> */}
 
             <EditTask onSuccess={refetch} taskId={taskId} />
           </div>

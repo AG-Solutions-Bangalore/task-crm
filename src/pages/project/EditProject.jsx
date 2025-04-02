@@ -44,7 +44,7 @@ import {
 import Loader from "@/components/loader/Loader";
 import ButtonConfigColor from "@/components/buttonComponent/ButtonConfig";
 import useApiToken from "@/components/common/UseToken";
-
+import paymentOptions from "../../components/common/PaymentOptions";
 const PROJECT_TYPES = [
   "Marketing",
   "IOS App",
@@ -88,8 +88,8 @@ const deleteProjectSub = async ({ projectSubId, token }) => {
   return response.data;
 };
 
-const EditProject = ({ projectId, onSuccess }) => {
-  const [open, setOpen] = useState(false);
+const EditProject = ({ projectId, onSuccess, open, setOpen }) => {
+  // const [open, setOpen] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteItemId, setDeleteItemId] = useState(null);
@@ -97,12 +97,12 @@ const EditProject = ({ projectId, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [deleteloading, setdeleteLoading] = useState(false);
   const token = useApiToken();
-
   const [formData, setFormData] = useState({
     project_name: "",
     client_name: "",
     project_desc: "",
     project_status: "Pending",
+    project_payment_status: "",
   });
 
   const [projectData, setProjectData] = useState([
@@ -145,6 +145,7 @@ const EditProject = ({ projectId, onSuccess }) => {
           client_name: project.client_name,
           project_desc: project.project_desc,
           project_status: project.project_status,
+          project_payment_status: project.project_payment_status,
         });
 
         const mappedProjectData = response.data.projectSub.map((sub) => ({
@@ -298,7 +299,8 @@ const EditProject = ({ projectId, onSuccess }) => {
     if (
       !formData.project_name ||
       !formData.client_name ||
-      !projectData[0].project_type 
+      !formData.project_payment_status ||
+      !projectData[0].project_type
     ) {
       toast({
         title: "Error",
@@ -309,7 +311,7 @@ const EditProject = ({ projectId, onSuccess }) => {
     }
 
     for (const item of projectData) {
-      if (!item.project_type ) {
+      if (!item.project_type) {
         toast({
           title: "Error",
           description: "All project types  must be filled",
@@ -339,13 +341,10 @@ const EditProject = ({ projectId, onSuccess }) => {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <Edit className="h-4 w-4" />
-        </Button>
-      </SheetTrigger>
-
-      <SheetContent className="sm:max-w-2xl overflow-y-auto">
+      <SheetContent
+        className="sm:max-w-2xl overflow-y-auto"
+        aria-describedby={undefined}
+      >
         <form onSubmit={handleSubmit}>
           <SheetHeader className="mb-4">
             <SheetTitle>Edit Project - {formData.client_name}</SheetTitle>
@@ -358,7 +357,7 @@ const EditProject = ({ projectId, onSuccess }) => {
           ) : (
             <>
               <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   <div className="grid gap-2">
                     <Label htmlFor="project_name" className="font-semibold">
                       Project Name *
@@ -375,7 +374,7 @@ const EditProject = ({ projectId, onSuccess }) => {
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="project_status" className="font-semibold">
-                      Project Status
+                      Project Status *
                     </Label>
                     <Select
                       value={formData.project_status}
@@ -391,6 +390,34 @@ const EditProject = ({ projectId, onSuccess }) => {
                       </SelectTrigger>
                       <SelectContent>
                         {statusOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label
+                      htmlFor="project_payment_status"
+                      className="font-semibold"
+                    >
+                      Payment Status *
+                    </Label>
+                    <Select
+                      value={formData.project_payment_status}
+                      onValueChange={(value) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          project_payment_status: value,
+                        }))
+                      }
+                    >
+                      <SelectTrigger className="">
+                        <SelectValue placeholder="Select Payment Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {paymentOptions.map((option) => (
                           <SelectItem key={option.value} value={option.value}>
                             {option.label}
                           </SelectItem>
@@ -524,21 +551,6 @@ const EditProject = ({ projectId, onSuccess }) => {
               </div>
 
               <SheetFooter className="mt-4">
-                {/* <Button
-                  type="submit"
-                  disabled={updateProjectMutation.isPending}
-                  className="w-full"
-                >
-                  {updateProjectMutation.isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Updating...
-                    </>
-                  ) : (
-                    "Update Project"
-                  )}
-                </Button> */}
-
                 <ButtonConfigColor
                   loading={loading}
                   buttontype="update"

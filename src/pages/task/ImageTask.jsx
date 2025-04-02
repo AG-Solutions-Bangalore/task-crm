@@ -46,7 +46,10 @@ const TaskDialog = ({ imageUrl, classcss, label }) => {
           </Tooltip>
         </TooltipProvider>
       )}
-      <DialogContent>
+      <DialogContent
+        className="max-h-screen overflow-y-auto"
+        aria-describedby={undefined}
+      >
         <DialogHeader>
           <DialogTitle>{label || "Image"}</DialogTitle>
         </DialogHeader>
