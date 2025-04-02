@@ -1,18 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetFooter,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
+import ButtonConfigColor from "@/components/buttonComponent/ButtonConfig";
+import useApiToken from "@/components/common/UseToken";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -20,12 +9,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SquarePlus } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { Base_Url } from "@/config/BaseUrl";
 import { useToast } from "@/hooks/use-toast";
-import ButtonConfigColor from "@/components/buttonComponent/ButtonConfig";
-import useApiToken from "@/components/common/UseToken";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
+import { XCircle } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const fetchProjects = async (token) => {
   const response = await axios.get(`${Base_Url}/api/panel-fetch-project`, {
@@ -78,6 +77,7 @@ const CreateTask = ({ onSuccess }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const token = useApiToken();
+  const [image, setImage] = useState(null);
 
   const [formData, setFormData] = useState({
     project_id: "",
@@ -196,8 +196,9 @@ const CreateTask = ({ onSuccess }) => {
           task_desc: "",
           task_due_date: "",
           task_priority: "Medium",
+          task_img: null,
         });
-
+        setImage(null);
         if (onSuccess) onSuccess();
         setOpen(false);
       } else {
@@ -250,7 +251,29 @@ const CreateTask = ({ onSuccess }) => {
       task_priority: value,
     }));
   };
-
+  const handlePaste = (e) => {
+    const items = e.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type.indexOf("image") === 0) {
+        const file = item.getAsFile();
+        if (file) {
+          setImage(URL.createObjectURL(file));
+          setFormData((prev) => ({
+            ...prev,
+            task_img: file,
+          }));
+        }
+      }
+    }
+  };
+  const handleRemoveImage = () => {
+    setImage(null);
+    setFormData((prev) => ({
+      ...prev,
+      task_img: null,
+    }));
+  };
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -430,9 +453,9 @@ const CreateTask = ({ onSuccess }) => {
                 min={getMinDate()}
               />
             </div>
-            <div className="grid gap-2">
+            {/* <div className="grid gap-2">
               <Label htmlFor="task_img" className="font-semibold">
-                Task Image *
+                Task Image 
               </Label>
               <Input
                 type="file"
@@ -441,8 +464,34 @@ const CreateTask = ({ onSuccess }) => {
                 onChange={handleImageChange}
                 accept="image/*"
               />
-            </div>
+            </div> */}
+            <div className="grid gap-2">
+              <Label htmlFor="task_img"> Image</Label>
 
+              <div
+                onPaste={handlePaste}
+                className=" col-span-3 w-full min-h-[120px] flex items-center justify-center border  border-gray-200 text-gray-500 text-sm rounded-md  transition-all"
+                onClick={() => document.getElementById("user_image").click()}
+              >
+                {image ? (
+                  <div className="relative w-full flex justify-center">
+                    <img
+                      src={image}
+                      alt="Uploaded or Pasted"
+                      className="max-h-40 object-contain rounded-md"
+                    />
+                    <button
+                      onClick={handleRemoveImage}
+                      className="absolute top-1 right-1 bg-white rounded-full p-1 shadow-md  transition-all"
+                    >
+                      <XCircle className="w-5 h-5 text-gray-600 " />
+                    </button>
+                  </div>
+                ) : (
+                  <span>Paste an image here</span>
+                )}
+              </div>
+            </div>
             {/* Task Priority - Using Tabs */}
             <div className="grid gap-2">
               <Label htmlFor="task_priority" className="font-semibold">

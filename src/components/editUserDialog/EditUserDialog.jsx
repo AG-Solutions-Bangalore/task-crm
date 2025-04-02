@@ -22,12 +22,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Base_Url } from "@/config/BaseUrl";
+import { Base_Url, UserImage } from "@/config/BaseUrl";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { Edit } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Edit, XCircle } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import ButtonConfigColor from "../buttonComponent/ButtonConfig";
 import useApiToken from "../common/UseToken";
 
@@ -36,6 +36,8 @@ const EditUserDialog = ({ onSuccess, userId }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
+  const [image, setImage] = useState(null);
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
@@ -93,16 +95,6 @@ const EditUserDialog = ({ onSuccess, userId }) => {
       status: value,
     }));
   };
-  const handleImageChange = (e) => {
-    const { name, files } = e.target;
-    if (files && files.length > 0) {
-      console.log("File Selected:", files[0]);
-      setFormData((prev) => ({
-        ...prev,
-        [name]: files[0],
-      }));
-    }
-  };
 
   const handleSubmit = async () => {
     if (!formData.email || !formData.mobile || !formData.status) {
@@ -117,7 +109,6 @@ const EditUserDialog = ({ onSuccess, userId }) => {
     setIsLoading(true);
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append("email", formData.email);
       formDataToSend.append("email", formData.email);
       formDataToSend.append("mobile", formData.mobile);
       formDataToSend.append("status", formData.status);
@@ -142,7 +133,7 @@ const EditUserDialog = ({ onSuccess, userId }) => {
           description: response?.data?.msg || "User updated successfully",
         });
 
-        onSuccess?.(); // Call onSuccess if it exists
+        onSuccess?.();
         setOpen(false);
       } else {
         toast({
@@ -162,8 +153,6 @@ const EditUserDialog = ({ onSuccess, userId }) => {
     }
   };
 
-  const [image, setImage] = useState(null);
-
   const handlePaste = (e) => {
     const items = e.clipboardData.items;
     for (let i = 0; i < items.length; i++) {
@@ -172,10 +161,42 @@ const EditUserDialog = ({ onSuccess, userId }) => {
         const file = item.getAsFile();
         if (file) {
           setImage(URL.createObjectURL(file));
+          setFormData((prev) => ({
+            ...prev,
+            user_image: file,
+          }));
         }
       }
     }
   };
+  // const handleRemoveImage = () => {
+  //   setImage(null);
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     user_image: null,
+  //   }));
+  // };
+  const fileInputRef = useRef(null);
+
+  const handleRemoveImage = () => {
+    setImage(null); // Reset the image state
+    setFormData((prev) => ({ ...prev, user_image: "" }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(URL.createObjectURL(file));
+      setFormData((prev) => ({
+        ...prev,
+        user_image: file,
+      }));
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <TooltipProvider>
@@ -212,7 +233,7 @@ const EditUserDialog = ({ onSuccess, userId }) => {
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <label htmlFor="mobile" className="text-right">
-              Mobile
+              Mobile *
             </label>
             <Input
               id="mobile"
@@ -230,7 +251,7 @@ const EditUserDialog = ({ onSuccess, userId }) => {
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <label htmlFor="email" className="text-right">
-              Email
+              Email *
             </label>
             <Input
               id="email"
@@ -243,7 +264,7 @@ const EditUserDialog = ({ onSuccess, userId }) => {
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <label htmlFor="status" className="text-right">
-              Status
+              Status *
             </label>
             <Select value={formData.status} onValueChange={handleStatusChange}>
               <SelectTrigger className="col-span-3">
@@ -258,23 +279,55 @@ const EditUserDialog = ({ onSuccess, userId }) => {
 
           <div className="grid grid-cols-4 items-center gap-4">
             <label htmlFor="user_image" className="text-right">
-              Task Image
+              Image
             </label>
-            <Input
+
+            {/* <Input
               type="file"
               id="user_image"
               name="user_image"
               onChange={handleImageChange}
               accept="image/*"
-              className="col-span-3"
-            />
-            <div
+              className="col-span-3 hidden"
+            /> */}
+            {/* <div
               contentEditable
+              suppressContentEditableWarning
               onPaste={handlePaste}
-              className="col-span-3 mt-2 border p-2"
-              style={{ minHeight: "100px" }}
+              className=" col-span-3 w-full min-h-[120px] flex items-center justify-center border  border-gray-200 text-gray-500 text-sm rounded-md  transition-all"
+              onClick={() => document.getElementById("user_image").click()}
+            ></div> */}
+      
+            <div
+              onPaste={handlePaste}
+              onClick={() => fileInputRef.current?.click()}
+              className="col-span-3 w-full min-h-[120px] flex items-center justify-center border border-gray-200 text-gray-500 text-sm rounded-md transition-all cursor-pointer"
             >
-              Paste an image here
+              {image || formData.user_image ? (
+                <div className="relative w-full flex justify-center">
+                  <img
+                    src={
+                      image ||
+                      (formData.user_image
+                        ? `${UserImage}/${formData.user_image}`
+                        : "")
+                    }
+                    alt="Uploaded or Pasted"
+                    className="max-h-40 object-contain rounded-md"
+                  />
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveImage();
+                    }}
+                    className="absolute top-1 right-1 bg-white rounded-full p-1 shadow-md transition-all"
+                  >
+                    <XCircle className="w-5 h-5 text-gray-600" />
+                  </button>
+                </div>
+              ) : (
+                <span>Paste an image here</span>
+              )}
             </div>
           </div>
         </div>

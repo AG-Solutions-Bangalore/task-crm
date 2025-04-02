@@ -2,6 +2,7 @@ import useApiToken from "@/components/common/UseToken";
 import Layout from "@/components/Layout";
 import ErrorLoader from "@/components/loader/ErrorLoader";
 import Loader from "@/components/loader/Loader";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -18,6 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Base_Url } from "@/config/BaseUrl";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -31,7 +33,7 @@ import {
 import axios from "axios";
 import { ArrowUpDown, ChevronDown, Search } from "lucide-react";
 import moment from "moment";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CreateProject from "./CreateProject";
 import EditProject from "./EditProject";
@@ -63,6 +65,9 @@ const ProjectList = () => {
   const [columnVisibility, setColumnVisibility] = useState({});
   const [rowSelection, setRowSelection] = useState({});
   const navigate = useNavigate();
+  const [projectTypeFilter, setProjectTypeFilter] = useState("all");
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const getProjectDetails = (project) => {
     const types = project.project_types?.split(",") || [];
@@ -82,6 +87,31 @@ const ProjectList = () => {
 
     return details;
   };
+  const projectTypesWithCounts = useMemo(() => {
+    if (!project) return [];
+
+    const typeCounts = project.reduce((acc, t) => {
+      acc[t.project_status] = (acc[t.project_status] || 0) + 1;
+      return acc;
+    }, {});
+
+    return Object.entries(typeCounts).map(([type, count]) => ({
+      type,
+      count,
+    }));
+  }, [project]);
+
+  const totalTaskCount = useMemo(() => {
+    if (!project) return 0;
+    return project.length;
+  }, [project]);
+
+  const filteredTasks = useMemo(() => {
+    if (!project) return [];
+    if (projectTypeFilter == "all") return project;
+    return project.filter((t) => t.project_status == projectTypeFilter);
+  }, [project, projectTypeFilter]);
+
   const statusColors = {
     Pending: "bg-yellow-500 text-white", // Yellow
     Confirmed: "bg-blue-500 text-white", // Blue
@@ -90,7 +120,10 @@ const ProjectList = () => {
     Completed: "bg-green-500 text-white", // Green
     default: "bg-gray-400 text-white", // Default Gray
   };
-
+  const handleRowClick = (projectId) => {
+    setSelectedProjectId(projectId);
+    setIsEditModalOpen(true);
+  };
   const columns = [
     {
       accessorKey: "index",
@@ -137,7 +170,11 @@ const ProjectList = () => {
         );
       },
     },
-
+    {
+      accessorKey: "project_payment_status",
+      header: "Payment",
+      cell: ({ row }) => <div>{row.getValue("project_payment_status")}</div>,
+    },
     {
       accessorKey: "project_details",
       header: "Project Details",
@@ -166,22 +203,11 @@ const ProjectList = () => {
         );
       },
     },
-    {
-      id: "actions",
-      header: "Action",
-      cell: ({ row }) => {
-        const projectId = row.original.id;
-        return (
-          <div className="flex flex-row">
-            <EditProject projectId={projectId} onSuccess={refetch} />
-          </div>
-        );
-      },
-    },
+
   ];
 
   const table = useReactTable({
-    data: project || [],
+    data: filteredTasks || [],
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -203,6 +229,7 @@ const ProjectList = () => {
       },
     },
   });
+
 
   // Render loading state
   if (isLoading) {
@@ -269,6 +296,37 @@ const ProjectList = () => {
           <CreateProject onSuccess={refetch} />
         </div>
         {/* table  */}
+        <div className=" mb-2 overflow-x-auto">
+          <Tabs
+            value={projectTypeFilter}
+            onValueChange={setProjectTypeFilter}
+            className="w-full"
+          >
+            <TabsList className="flex w-full justify-between md:justify-start gap-2">
+              <TabsTrigger
+                value="all"
+                className="flex-1 md:flex-initial whitespace-nowrap"
+              >
+                All Projects
+                <Badge variant="secondary" className="ml-2">
+                  {totalTaskCount}
+                </Badge>
+              </TabsTrigger>
+              {projectTypesWithCounts.map(({ type, count }) => (
+                <TabsTrigger
+                  key={type}
+                  value={type}
+                  className="flex-1 md:flex-initial whitespace-nowrap"
+                >
+                  {type}
+                  <Badge variant="secondary" className="ml-2">
+                    {count}
+                  </Badge>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        </div>
         <div className="rounded-md border">
           <Table>
             <TableHeader>
@@ -289,7 +347,7 @@ const ProjectList = () => {
                 </TableRow>
               ))}
             </TableHeader>
-            <TableBody>
+            {/* <TableBody>
               {table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
                   <TableRow
@@ -316,10 +374,39 @@ const ProjectList = () => {
                   </TableCell>
                 </TableRow>
               )}
+            </TableBody> */}
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    onClick={() => handleRowClick(row.original.id)} // ✅ Add this!
+                    className="cursor-pointer hover:bg-gray-100"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No results.
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </div>
-        {/* row slection and pagintaion button  */}
         <div className="flex items-center justify-end space-x-2 py-4">
           <div className="flex-1 text-sm text-muted-foreground">
             Total Projects : &nbsp;
@@ -344,6 +431,18 @@ const ProjectList = () => {
             </Button>
           </div>
         </div>
+
+        {selectedProjectId && isEditModalOpen && (
+          <EditProject
+            projectId={selectedProjectId}
+            open={isEditModalOpen}
+            setOpen={setIsEditModalOpen}
+            onSuccess={() => {
+              refetch();
+              setIsEditModalOpen(false);
+            }}
+          />
+        )}
       </div>
     </Layout>
   );

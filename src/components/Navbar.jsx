@@ -6,35 +6,26 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useState } from "react";
-import {
-  FaBars,
-  FaChevronLeft,
-  FaChevronRight,
-  FaCompress,
-  FaExpand,
-  FaTimes,
-} from "react-icons/fa";
+import { FaCompress, FaExpand } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
+import { Base_Url } from "@/config/BaseUrl";
 import { useToast } from "@/hooks/use-toast";
+import { logout } from "@/redux/authSlice";
+import { persistor } from "@/redux/store";
+import axios from "axios";
 import {
-  CircleUser,
-  LogOut,
   Menu,
   SquareChevronLeft,
   SquareChevronRight,
   SquareX,
-  User,
 } from "lucide-react";
-import ButtonConfigColor from "./buttonComponent/ButtonConfig";
-import { Label } from "./ui/label";
-import { Input } from "./ui/input";
-import { Base_Url } from "@/config/BaseUrl";
-import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
+import ButtonConfigColor from "./buttonComponent/ButtonConfig";
 import useApiToken from "./common/UseToken";
-import { persistor } from "@/redux/store";
-import { logout } from "@/redux/authSlice";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import UserDropdown from "./UserDropDown";
 
 const Navbar = ({
   toggleSidebar,
@@ -216,42 +207,11 @@ const Navbar = ({
           >
             {isFullscreen ? <FaCompress size={20} /> : <FaExpand size={20} />}
           </button>
-          <div className="relative">
-            <button
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              aria-label="Toggle dropdown"
-            >
-              <CircleUser size={20} />
-            </button>
 
-            {isDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
-                <button
-                  className="flex items-center gap-2 w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-all"
-                  onClick={() => setIsChangePasswordOpen(true)}
-                >
-                  <span className="material-icons text-gray-500">
-                    <User size={20} />
-                  </span>
-                  Change Password
-                </button>
-
-                <button
-                  onClick={() => {
-                    setIsDropdownOpen(false);
-                    setIsLogoutDialogOpen(true);
-                  }}
-                  className="flex items-center gap-2 w-full px-4 py-3 text-sm text-gray-700 hover:bg-red-100 hover:text-red-600 transition-all"
-                >
-                  <span className="material-icons text-red-500">
-                    <LogOut size={20} />{" "}
-                  </span>
-                  Logout
-                </button>
-              </div>
-            )}
-          </div>
+          <UserDropdown
+            setIsChangePasswordOpen={setIsChangePasswordOpen}
+            setIsLogoutDialogOpen={setIsLogoutDialogOpen}
+          />
         </div>
       </div>
       {/* //Chnage password */}

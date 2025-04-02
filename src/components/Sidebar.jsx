@@ -1,4 +1,5 @@
 import { NoImage, UserImage } from "@/config/BaseUrl";
+import ImageDialog from "@/pages/user/ImageDialog";
 import {
   BookmarkCheck,
   Building2,
@@ -10,6 +11,7 @@ import {
   Loader2,
   User,
 } from "lucide-react";
+import moment from "moment";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { NavLink, useLocation } from "react-router-dom";
@@ -18,6 +20,8 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
   const [openSubmenu, setOpenSubmenu] = useState("");
   const [userType, setUserType] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   const userImageUrl = useSelector((state) => state.auth.image);
   const [userInfo, setUserInfo] = useState({
     name: "",
@@ -71,6 +75,7 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
       icon: BookmarkCheck,
       subitems: [
         { name: "Pending Task", path: "/task" },
+        { name: "Hold Task", path: "/task-hold" },
         { name: "Completed Task", path: "/task-completed" },
         ...(storedUserType === 2
           ? [{ name: "Finished Task", path: "/task-finished" }]
@@ -87,6 +92,11 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
         { name: "Project Date", path: "/task-project-date" },
         { name: "Project Assign", path: "/task-project-assign" },
       ],
+    },
+    {
+      name: "Full Report",
+      path: "/full-report",
+      icon: FolderGit2,
     },
   ];
 
@@ -126,7 +136,11 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
       return dateString;
     }
   };
-
+  const handleImageClick = () => {
+    if (userImageUrl) {
+      setIsDialogOpen(true);
+    }
+  };
   return (
     <>
       {isOpen && (
@@ -209,26 +223,53 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
           ))}
         </div>
 
-        {/* User info section at the bottom */}
         {!isCollapsed && (
-          <div className="p-4 border-t border-gray-200 flex justify-center capitalize">
-            <div className="flex items-center justify-center relative">
-            {isLoading && (
-                <div className="absolute flex items-center justify-center">
-                  <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
-                </div>
-              )}
+          <div className="p-2 border-t border-gray-200">
+            {/* Updated Date */}
+            <h3 className="text-sm text-gray-600 font-medium  text-center border-b pb-3 border-gray-200">
+              Updated on:{" "}
+              <span className="font-semibold text-gray-800">02-Apr-2025</span>
+            </h3>
 
-              <img
-                src={userImageUrl ? `${UserImage}/${userImageUrl}` : NoImage}
-                alt="User"
-                className="rounded-full w-12 h-12 object-cover"
-                onLoad={handleImageLoad}
-                style={{ display: isLoading ? "none" : "block" }}
-              />
-            </div>
-            <div className="text-md font-medium text-gray-900 flex justify-center items-center">
-              {userInfo.name}
+            {/* Profile Section */}
+            <div className="flex items-center gap-4 p-2 bg-gray-50 rounded-lg shadow-sm">
+              {/* Profile Image */}
+              <div className="relative w-16 h-16 flex items-center justify-center">
+                {isLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-white/50 rounded-full">
+                    <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
+                  </div>
+                )}
+
+                <img
+                  src={userImageUrl ? `${UserImage}/${userImageUrl}` : NoImage}
+                  alt="User"
+                  className="rounded-full w-16 h-16 object-cover shadow-md transition-transform duration-300 hover:scale-105 cursor-pointer"
+                  onLoad={handleImageLoad}
+                  onClick={handleImageClick}
+                  style={{ display: isLoading ? "none" : "block" }}
+                />
+
+                {/* Image Dialog */}
+                {isDialogOpen && (
+                  <ImageDialog
+                    imageUrl={`${UserImage}/${userImageUrl}`}
+                    label={storedName}
+                    isDialogOpen={isDialogOpen}
+                    setIsDialogOpen={setIsDialogOpen}
+                  />
+                )}
+              </div>
+
+              {/* User Details */}
+              <div className="flex flex-col">
+                <span className="text-lg font-semibold text-gray-900 capitalize">
+                  {userInfo.name}
+                </span>
+                <span className="text-sm text-gray-500">
+                  {moment(storedLastLogin).format("DD-MMM-YYYY")}
+                </span>
+              </div>
             </div>
           </div>
         )}

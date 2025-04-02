@@ -120,11 +120,7 @@ const SignIn = () => {
         console.log("Dispatching user data:", userData);
         dispatch(loginSuccess(userData));
 
-        console.log(
-          "Navigating to:",
-          userInfo.user.user_type === 1 ? "/task" : "/home"
-        );
-        navigate(userInfo.user.user_type === 1 ? "/task" : "/home");
+        navigate("/home");
       } else {
         toast({
           title: "Error",

@@ -3,26 +3,26 @@ import useApiToken from "@/components/common/UseToken";
 import Layout from "@/components/Layout";
 import ErrorLoader from "@/components/loader/ErrorLoader";
 import Loader from "@/components/loader/Loader";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Base_Url } from "@/config/BaseUrl";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import moment from "moment";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useReactToPrint } from "react-to-print";
 const TaskCard = ({ task }) => {
   return (
-    <div className="bg-gray-100 rounded-xl shadow-md p-4 flex justify-between items-center">
+    <div className="border border-gray-300 rounded-md p-2 shadow-sm flex items-center justify-between text-xs">
       <div className="space-y-1">
-        <h2 className="text-xs font-semibold text-gray-900">
-          {task.project_name}
-        </h2>
-        <p className="text-[10px] text-gray-700">{task.task_title}</p>
+        <h2 className="font-semibold text-gray-900">{task.project_name}</h2>
+        <p className="text-gray-700">{task.task_title}</p>
       </div>
 
-      <div className="w-5 h-5 flex items-center justify-center rounded-full bg-gray-800 text-white text-lg font-medium">
-        {task.to_name ? task.to_name.charAt(0).toUpperCase() : "?"}
+      <div>
+        <div className="w-6 h-6 flex items-center justify-center rounded-full border border-gray-400 text-gray-700 font-medium">
+          {task.to_name ? task.to_name.charAt(0).toUpperCase() : "?"}
+        </div>{" "}
+        <p className="text-gray-700 text-xs">
+          {task.task_status ? task.task_status.slice(0, 3) : "?"}
+        </p>
       </div>
     </div>
   );
@@ -69,7 +69,7 @@ const FullReport = () => {
     pageStyle: `
       @page {
         size: A4 portrait; /* 
-        margin: 5mm; 
+        // margin: 5mm; 
       }
   
       @media print {
@@ -95,7 +95,7 @@ const FullReport = () => {
   if (isLoading) {
     return (
       <Layout>
-        <Loader data={"Project Task Report"} />
+        <Loader data={"Full Report"} />
       </Layout>
     );
   }
@@ -121,24 +121,17 @@ const FullReport = () => {
             onClick={handlPrintPdf}
           />
         </div>
-
         <div className="overflow-x-auto">
-          <div className="flex justify-center">
-            <h2 className="text-2xl my-3 hidden print:block">
-              Project Assign Report
-            </h2>
-          </div>
-
           {Object.entries(groupedByProject).map(
             ([projectName, types], index) => (
-              <div key={index} className="mb-6  rounded-lg shadow-lg">
+              <div key={index} className="mb-6">
                 {Object.entries(types).map(
                   ([projectType, tasks], typeIndex) => (
-                    <div key={typeIndex} className="mb-4">
-                      <div className="text-xs font-bold p-2 bg-gray-200 print:bg-white border-b border-black my-3">
+                    <div key={typeIndex} className="mb-2">
+                      <div className="text-xs font-bold p-1 bg-gray-200 print:bg-white border-b border-black my-3">
                         {projectType}
                       </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 p-4">
                         {tasks.map((task, idx) => (
                           <TaskCard key={idx} task={task} />
                         ))}
@@ -157,21 +150,19 @@ const FullReport = () => {
         </div>
         <div className="overflow-x-auto hidden print:block" ref={containerRef}>
           <div className="flex justify-center">
-            <h2 className="text-2xl my-3 hidden print:block">
-              Project Assign Report
-            </h2>
+            <h2 className="text-2xl my-3 hidden print:block">Full Report </h2>
           </div>
 
           {Object.entries(groupedByProject).map(
             ([projectName, types], index) => (
-              <div key={index} className="mb-6  rounded-lg shadow-lg">
+              <div key={index} className="mb-6">
                 {Object.entries(types).map(
                   ([projectType, tasks], typeIndex) => (
-                    <div key={typeIndex} className="mb-4">
-                      <div className="text-xs font-bold p-2 bg-gray-200 print:bg-white border-b border-black my-3">
+                    <div key={typeIndex} className="mb-2">
+                      <div className="text-xs font-bold p-1 bg-gray-200 print:bg-white border-b border-black my-3">
                         {projectType}
                       </div>
-                      <div className="grid  grid-cols-4 gap-4 p-4">
+                      <div className="grid  grid-cols-4 gap-2">
                         {tasks.map((task, idx) => (
                           <TaskCard key={idx} task={task} />
                         ))}

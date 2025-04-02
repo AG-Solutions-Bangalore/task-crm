@@ -53,7 +53,7 @@ import EditTask from "./EditTask";
 import TaskDialog from "./ImageTask";
 import { encryptId } from "@/components/common/EncryptionDecryption";
 
-const CompletedTaskList = () => {
+const HoldTaskList = () => {
   const token = useApiToken();
   const navigate = useNavigate();
   const {
@@ -65,7 +65,7 @@ const CompletedTaskList = () => {
     queryKey: ["task"],
     queryFn: async () => {
       const response = await axios.get(
-        `${Base_Url}/api/panel-fetch-task-completed-list`,
+        `${Base_Url}/api/panel-fetch-task-hold-list`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -118,9 +118,10 @@ const CompletedTaskList = () => {
   const PriporitystatusColors = {
     Low: "bg-yellow-400 text-black", // Brighter Yellow for readability
     Medium: "bg-blue-500 text-black", // Blue
-    High: "bg-orange-500 text-black", // oranage
+    High: "bg-red-500 text-black", // red
     default: "bg-gray-500 text-black", // Slightly darker Gray for better visibility
   };
+
   const columns = [
     {
       accessorKey: "index",
@@ -199,6 +200,7 @@ const CompletedTaskList = () => {
         return <div>{date ? moment(date).format("DD-MM-YYYY") : "N/A"}</div>;
       },
     },
+
     {
       accessorKey: "task_priority",
       header: "Priority",
@@ -216,7 +218,6 @@ const CompletedTaskList = () => {
         );
       },
     },
-
     {
       accessorKey: "task_status",
       header: "Status",
@@ -321,14 +322,14 @@ const CompletedTaskList = () => {
     <Layout>
       <div className="w-full p-4">
         <div className="flex text-left text-2xl text-gray-800 font-[400]">
-          Completed Task List
+          Hold Task List
         </div>
 
         <div className="flex flex-col md:flex-row items-center py-4 gap-4">
           <div className="relative w-full md:w-72">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
             <Input
-              placeholder="Search completed tasks..."
+              placeholder="Search hold  tasks..."
               value={table.getState().globalFilter || ""}
               onChange={(event) => table.setGlobalFilter(event.target.value)}
               className="pl-8 bg-gray-50 border-gray-200 focus:border-gray-300 focus:ring-gray-200"
@@ -478,4 +479,4 @@ const CompletedTaskList = () => {
   );
 };
 
-export default CompletedTaskList;
+export default HoldTaskList;

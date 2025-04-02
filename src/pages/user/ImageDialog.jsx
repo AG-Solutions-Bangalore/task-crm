@@ -13,7 +13,10 @@ const ImageDialog = ({ imageUrl, label, isDialogOpen, setIsDialogOpen }) => {
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogContent aria-describedby={undefined}>
+      <DialogContent
+        aria-describedby={undefined}
+        className="max-h-screen overflow-y-auto"
+      >
         <DialogHeader>
           <DialogTitle>{label || ""}</DialogTitle>
         </DialogHeader>

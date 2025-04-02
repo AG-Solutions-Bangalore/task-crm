@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Layout from "../../components/Layout";
 import useApiToken from "@/components/common/UseToken";
 import { useSelector } from "react-redux";
+import PendingTask from "./PendingTask";
 
 const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
@@ -99,11 +100,11 @@ const Dashboard = () => {
       value: dashboardData?.task_inprocess_count,
       color: "bg-purple-100 text-purple-800",
     },
-    {
-      title: "Completed",
-      value: dashboardData?.task_completed_count,
-      color: "bg-green-100 text-green-800",
-    },
+    // {
+    //   title: "Completed",
+    //   value: dashboardData?.task_completed_count,
+    //   color: "bg-green-100 text-green-800",
+    // },
     {
       title: "Canceled",
       value: dashboardData?.task_cancel_count,
@@ -123,27 +124,27 @@ const Dashboard = () => {
         <h1 className="text-2xl font-bold">Dashboard Overview</h1>
 
         {userType == "2" && (
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Projects</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            {projectCards.map((card, index) => (
-              <Card key={`project-${index}`} className="shadow-sm">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    {card.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div
-                    className={`text-2xl font-bold rounded-full w-12 h-12 flex items-center justify-center ${card.color}`}
-                  >
-                    {card.value}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Projects</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              {projectCards.map((card, index) => (
+                <Card key={`project-${index}`} className="shadow-sm">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      {card.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div
+                      className={`text-2xl font-bold rounded-full w-12 h-12 flex items-center justify-center ${card.color}`}
+                    >
+                      {card.value}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
-        </div>
         )}
 
         {/* Conditionally render Tasks Section based on userType */}
@@ -169,6 +170,9 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+      <PendingTask
+        task={dashboardData?.task_pending_list}
+      />
     </Layout>
   );
 };

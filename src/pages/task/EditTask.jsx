@@ -155,7 +155,6 @@ const EditTask = ({ onSuccess, taskId }) => {
       [name]: value,
     }));
   };
-  console.log(storedUserType);
   const handleSubmit = async () => {
     if (!formData.task_priority || !formData.task_status) {
       toast({
