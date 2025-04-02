@@ -43,7 +43,7 @@ const PROJECT_TYPES = [
   "Festive Posts",
 ];
 
-const createProject = async (projectData) => {
+const createProject = async (projectData, token) => {
   const response = await axios.post(
     `${Base_Url}/api/panel-create-project`,
     projectData,
@@ -78,7 +78,9 @@ const CreateProject = ({ onSuccess }) => {
   ]);
 
   const createProjectMutation = useMutation({
-    mutationFn: createProject,
+    // mutationFn: createProject,
+    mutationFn: ({ taskData, token }) => createProject(taskData, token),
+
     onSuccess: (response) => {
       setLoading(false);
       if (response.code === 200) {
@@ -198,7 +200,7 @@ const CreateProject = ({ onSuccess }) => {
     };
 
     // Trigger mutation
-    createProjectMutation.mutate(requestData, token);
+    createProjectMutation.mutate({ taskData: requestData, token });
   };
 
   return (

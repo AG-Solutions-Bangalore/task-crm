@@ -42,6 +42,7 @@ const EditUserDialog = ({ onSuccess, userId }) => {
     mobile: "",
     email: "",
     status: "",
+    user_image: "",
   });
   const token = useApiToken();
 
@@ -59,11 +60,12 @@ const EditUserDialog = ({ onSuccess, userId }) => {
         mobile: userData.mobile,
         email: userData.email,
         status: userData.status,
+        user_image: userData.user_image,
       });
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to fetch country data",
+        description: "Failed to fetch user",
         variant: "destructive",
       });
     } finally {
@@ -91,6 +93,16 @@ const EditUserDialog = ({ onSuccess, userId }) => {
       status: value,
     }));
   };
+  const handleImageChange = (e) => {
+    const { name, files } = e.target;
+    if (files && files.length > 0) {
+      console.log("File Selected:", files[0]);
+      setFormData((prev) => ({
+        ...prev,
+        [name]: files[0],
+      }));
+    }
+  };
 
   const handleSubmit = async () => {
     if (!formData.email || !formData.mobile || !formData.status) {
@@ -104,37 +116,64 @@ const EditUserDialog = ({ onSuccess, userId }) => {
 
     setIsLoading(true);
     try {
-      const response = await axios.put(
-        `${Base_Url}/api/panel-update-user/${userId}`,
-        formData,
+      const formDataToSend = new FormData();
+      formDataToSend.append("email", formData.email);
+      formDataToSend.append("email", formData.email);
+      formDataToSend.append("mobile", formData.mobile);
+      formDataToSend.append("status", formData.status);
+      if (formData.user_image instanceof File) {
+        formDataToSend.append("user_image", formData.user_image);
+      }
+
+      const response = await axios.post(
+        `${Base_Url}/api/panel-update-user/${userId}?_method=PUT`,
+        formDataToSend,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
         }
       );
 
-      if (response?.data.code == 200) {
+      if (response?.data?.code === 200) {
         toast({
           title: "Success",
-          description: response.data.msg,
+          description: response?.data?.msg || "User updated successfully",
         });
 
-        if (onSuccess) onSuccess();
+        onSuccess?.(); // Call onSuccess if it exists
         setOpen(false);
       } else {
         toast({
           title: "Error",
-          description: response.data.msg,
+          description: response?.data?.msg || "Something went wrong",
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
         title: "Error",
-        description: error.response?.data?.message || "Failed to update Bank",
+        description: error.response?.data?.message || "Failed to update user",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const [image, setImage] = useState(null);
+
+  const handlePaste = (e) => {
+    const items = e.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type.indexOf("image") === 0) {
+        const file = item.getAsFile();
+        if (file) {
+          setImage(URL.createObjectURL(file));
+        }
+      }
     }
   };
   return (
@@ -215,6 +254,28 @@ const EditUserDialog = ({ onSuccess, userId }) => {
                 <SelectItem value="Inactive">Inactive</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="user_image" className="text-right">
+              Task Image
+            </label>
+            <Input
+              type="file"
+              id="user_image"
+              name="user_image"
+              onChange={handleImageChange}
+              accept="image/*"
+              className="col-span-3"
+            />
+            <div
+              contentEditable
+              onPaste={handlePaste}
+              className="col-span-3 mt-2 border p-2"
+              style={{ minHeight: "100px" }}
+            >
+              Paste an image here
+            </div>
           </div>
         </div>
         <DialogFooter>
