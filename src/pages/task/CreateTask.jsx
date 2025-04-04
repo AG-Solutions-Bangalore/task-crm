@@ -23,7 +23,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Base_Url } from "@/config/BaseUrl";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { XCircle } from "lucide-react";
 
@@ -80,7 +80,7 @@ const CreateTask = ({ onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const token = useApiToken();
   const [image, setImage] = useState(null);
-
+  const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     project_id: "",
     project_type: "",
@@ -201,7 +201,12 @@ const CreateTask = ({ onSuccess }) => {
           task_img: null,
         });
         setImage(null);
-        if (onSuccess) onSuccess();
+        if (onSuccess) {
+          onSuccess();
+        } else {
+     
+          queryClient.invalidateQueries({ queryKey: ['task'] });
+        }
         setOpen(false);
       } else {
         toast({
