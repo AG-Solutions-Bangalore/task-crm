@@ -21,6 +21,8 @@ import ProjectDate from "@/pages/report/ProjectDate/ProjectDate";
 import ProjectAssign from "@/pages/report/ProjectAssign/ProjectAssign";
 import HoldTaskList from "@/pages/task/HoldTaskList";
 import FullReport from "@/pages/report/FullReport/FullReport";
+import RegularTaskList from "@/pages/task/RegularTaskList";
+import PaymentList from "@/pages/payment/PaymentList";
 
 function AppRoutes() {
   return (
@@ -42,11 +44,14 @@ function AppRoutes() {
           <Route path="/user" element={<UserList />} />
           {/* project  */}
           <Route path="/project" element={<ProjectList />} />
+          {/* payment  */}
+          <Route path="/payment" element={<PaymentList />} />
           {/* task  */}
           <Route path="/task" element={<AllTaskList />} />
           <Route path="/task-hold" element={<HoldTaskList />} />
           <Route path="/task-completed" element={<CompletedTaskList />} />
           <Route path="/task-finished" element={<FinishedTaskList />} />
+          <Route path="/task-regular" element={<RegularTaskList />} />
           <Route path="/task-project-date" element={<ProjectDate />} />
           <Route path="/task-project-assign" element={<ProjectAssign />} />
           <Route path="/task-view-task/:id" element={<ViewComponentTask />} />

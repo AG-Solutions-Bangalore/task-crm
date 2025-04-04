@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import ButtonConfigColor from "@/components/buttonComponent/ButtonConfig";
+import { MemoizedSelect } from "@/components/common/MemoizedSelect";
 import useApiToken from "@/components/common/UseToken";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,7 +26,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { XCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+
 
 const fetchProjects = async (token) => {
   const response = await axios.get(`${Base_Url}/api/panel-fetch-project`, {
@@ -302,6 +304,8 @@ const CreateTask = ({ onSuccess }) => {
     formDataToSend.append("to_id", formData.to_id);
     formDataToSend.append("task_title", formData.task_title);
     formDataToSend.append("task_due_date", formData.task_due_date);
+    formDataToSend.append("task_desc", formData.task_desc);
+    formDataToSend.append("task_priority", formData.task_priority);
 
     if (formData.task_img instanceof File) {
       console.log("Appending File:", formData.task_img); // Debugging
@@ -341,24 +345,22 @@ const CreateTask = ({ onSuccess }) => {
               <Label htmlFor="project_id" className="font-semibold">
                 Project *
               </Label>
-              <Select
-                onValueChange={(value) =>
-                  handleSelectChange("project_id", value)
-                }
-                value={formData.project_id}
-                disabled={isLoading.projects}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a project" />
-                </SelectTrigger>
-                <SelectContent>
-                  {projects.map((project) => (
-                    <SelectItem key={project.id} value={project.id.toString()}>
-                      {project.project_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <MemoizedSelect
+                       onChange={(value) =>
+                        handleSelectChange("project_id", value)
+                      }
+                      value={formData.project_id}
+                      disabled={isLoading.projects}
+                      options={
+                        projects?.map((project) => ({
+                          value: project.id,
+                          label: project.project_name,
+                        })) || []
+                      }
+                      placeholder="Select a Project"
+                      className="text-xs h-5 flex-1"
+                    />
+              
             </div>
 
             {/* Project Type Selection */}

@@ -62,7 +62,7 @@ const HoldTaskList = () => {
     isError,
     refetch,
   } = useQuery({
-    queryKey: ["task"],
+    queryKey: ["holdtask"],
     queryFn: async () => {
       const response = await axios.get(
         `${Base_Url}/api/panel-fetch-task-hold-list`,
