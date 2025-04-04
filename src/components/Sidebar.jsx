@@ -75,16 +75,18 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
     //   path: "/task",
     //   icon: BookmarkCheck,
     // },
-
+    
     {
       name: "Task",
       icon: BookmarkCheck,
       subitems: [
         { name: "Pending Task", path: "/task" },
         { name: "Hold Task", path: "/task-hold" },
+        { name: "Regular Task", path: "/task-regular" },
         { name: "Completed Task", path: "/task-completed" },
+
         ...(storedUserType === 2
-          ? [{ name: "Regular Task", path: "/task-regular" },{ name: "Finished Task", path: "/task-finished" }]
+          ? [{ name: "Finished Task", path: "/task-finished" }]
    
           : []),
       ],

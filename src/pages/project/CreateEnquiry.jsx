@@ -45,7 +45,7 @@ const PROJECT_TYPES = [
 
 const createProject = async (projectData, token) => {
   const response = await axios.post(
-    `${Base_Url}/api/panel-create-project`,
+    `${Base_Url}/api/panel-create-enquiry`,
     projectData,
     {
       headers: {
@@ -58,7 +58,7 @@ const createProject = async (projectData, token) => {
   return response.data;
 };
 
-const CreateProject = ({ onSuccess }) => {
+const CreateEnquiry = ({ onSuccess }) => {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
   const token = useApiToken();
@@ -213,7 +213,7 @@ const CreateProject = ({ onSuccess }) => {
         <ButtonConfigColor
           type="button"
           buttontype="create"
-          label="Project"
+          label="Enquiry"
           className="ml-2"
         />
       </SheetTrigger>
@@ -221,7 +221,7 @@ const CreateProject = ({ onSuccess }) => {
       <SheetContent className="sm:max-w-md overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <SheetHeader className="mb-4">
-            <SheetTitle>Create New Project</SheetTitle>
+            <SheetTitle>Create New Enquiry</SheetTitle>
           </SheetHeader>
 
           <div className="grid gap-4 py-4">
@@ -353,7 +353,7 @@ const CreateProject = ({ onSuccess }) => {
               label={
                 createProjectMutation.isPending
                   ? "Creating..."
-                  : "Create Project"
+                  : "Create Enquiry"
               }
               className="w-full"
             />
@@ -364,4 +364,4 @@ const CreateProject = ({ onSuccess }) => {
   );
 };
 
-export default CreateProject;
+export default CreateEnquiry;

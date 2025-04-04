@@ -26,6 +26,9 @@ import useApiToken from "./common/UseToken";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import UserDropdown from "./UserDropDown";
+import CreateProject from "@/pages/project/CreateProject";
+import CreateTask from "@/pages/task/CreateTask";
+import CreateEnquiry from "@/pages/project/CreateEnquiry";
 
 const Navbar = ({
   toggleSidebar,
@@ -200,6 +203,11 @@ const Navbar = ({
           </button>
         </div>
         <div className="flex items-center gap-2">
+         <div className="hidden sm:block">
+         <CreateProject />
+             <CreateEnquiry  />
+          <CreateTask />
+         </div>
           <button
             onClick={toggleFullscreen}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors hidden lg:block"

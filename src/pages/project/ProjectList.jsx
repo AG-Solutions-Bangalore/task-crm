@@ -37,6 +37,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CreateProject from "./CreateProject";
 import EditProject from "./EditProject";
+import CreateEnquiry from "./CreateEnquiry";
 
 const ProjectList = () => {
   const token = useApiToken();
@@ -118,6 +119,7 @@ const ProjectList = () => {
     "On Progress": "bg-cyan-500 text-white", // Light Blue
     Cancel: "bg-red-500 text-white", // Red
     Completed: "bg-green-500 text-white", // Green
+    Enquiry: "bg-indigo-500 text-white", // pink
     default: "bg-gray-400 text-white", // Default Gray
   };
   const handleRowClick = (projectId) => {
@@ -294,6 +296,7 @@ const ProjectList = () => {
           </DropdownMenu>
 
           <CreateProject onSuccess={refetch} />
+          <CreateEnquiry onSuccess={refetch} />
         </div>
         {/* table  */}
         <div className=" mb-2 overflow-x-auto">

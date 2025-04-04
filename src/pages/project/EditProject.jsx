@@ -60,6 +60,7 @@ const statusOptions = [
   { value: "On Progress", label: "On Progress" },
   { value: "Cancel", label: "Cancel" },
   { value: "Completed", label: "Completed" },
+  { value: "Enquiry", label: "Enquiry" },
   { value: "Hold", label: "Hold" },
   { value: "Regular", label: "Regular" },
 ];
