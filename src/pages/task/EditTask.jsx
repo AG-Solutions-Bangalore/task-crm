@@ -64,6 +64,9 @@ const EditTask = ({ onSuccess, taskId }) => {
     { value: "Pending", label: "Pending" },
     { value: "Approved", label: "Approved" },
     { value: "In Process", label: "In Process" },
+  
+    { value: "Hold", label: "Hold" },
+    { value: "Regular", label: "Regular" },
     { value: "Completed", label: "Completed" },
     { value: "Cancel", label: "Cancel" },
     ...(storedUserType === 2 ? [{ value: "Finish", label: "Finish" }] : []),

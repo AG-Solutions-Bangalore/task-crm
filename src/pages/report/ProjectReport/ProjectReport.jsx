@@ -11,7 +11,7 @@ const ProjectReport = () => {
   const token = useApiToken();
 
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ["project"],
+    queryKey: ["projectreport"],
     queryFn: async () => {
       const response = await axios.post(
         `${Base_Url}/api/panel-fetch-project-list-report`,

@@ -25,7 +25,7 @@ const ProjectDate = () => {
     isError,
     refetch,
   } = useQuery({
-    queryKey: ["task", formData.task_updated],
+    queryKey: ["projectdate", formData.task_updated],
     queryFn: async () => {
       if (!formData.task_updated) return [];
       const response = await axios.post(

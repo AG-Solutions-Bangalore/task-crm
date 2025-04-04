@@ -1,6 +1,7 @@
 import { NoImage, UserImage } from "@/config/BaseUrl";
 import ImageDialog from "@/pages/user/ImageDialog";
 import {
+  BadgeIndianRupee,
   BookmarkCheck,
   Building2,
   ChevronDown,
@@ -64,6 +65,11 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
       path: "/project",
       icon: FolderGit2,
     },
+    {
+      name: "Payment",
+      path: "/payment",
+      icon: BadgeIndianRupee,
+    },
     // {
     //   name: "Task",
     //   path: "/task",
@@ -78,7 +84,8 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
         { name: "Hold Task", path: "/task-hold" },
         { name: "Completed Task", path: "/task-completed" },
         ...(storedUserType === 2
-          ? [{ name: "Finished Task", path: "/task-finished" }]
+          ? [{ name: "Regular Task", path: "/task-regular" },{ name: "Finished Task", path: "/task-finished" }]
+   
           : []),
       ],
     },
@@ -228,7 +235,7 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
             {/* Updated Date */}
             <h3 className="text-sm text-gray-600 font-medium  text-center border-b pb-3 border-gray-200">
               Updated on:{" "}
-              <span className="font-semibold text-gray-800">02-Apr-2025</span>
+              <span className="font-semibold text-gray-800">04-Apr-2025</span>
             </h3>
 
             {/* Profile Section */}

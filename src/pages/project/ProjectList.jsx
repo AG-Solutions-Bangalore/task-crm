@@ -65,7 +65,7 @@ const ProjectList = () => {
   const [columnVisibility, setColumnVisibility] = useState({});
   const [rowSelection, setRowSelection] = useState({});
   const navigate = useNavigate();
-  const [projectTypeFilter, setProjectTypeFilter] = useState("all");
+  const [projectTypeFilter, setProjectTypeFilter] = useState("On Progress");
   const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
@@ -303,15 +303,7 @@ const ProjectList = () => {
             className="w-full"
           >
             <TabsList className="flex w-full justify-between md:justify-start gap-2">
-              <TabsTrigger
-                value="all"
-                className="flex-1 md:flex-initial whitespace-nowrap"
-              >
-                All Projects
-                <Badge variant="secondary" className="ml-2">
-                  {totalTaskCount}
-                </Badge>
-              </TabsTrigger>
+             
               {projectTypesWithCounts.map(({ type, count }) => (
                 <TabsTrigger
                   key={type}
@@ -324,6 +316,15 @@ const ProjectList = () => {
                   </Badge>
                 </TabsTrigger>
               ))}
+               <TabsTrigger
+                value="all"
+                className="flex-1 md:flex-initial whitespace-nowrap"
+              >
+                All Projects
+                <Badge variant="secondary" className="ml-2">
+                  {totalTaskCount}
+                </Badge>
+              </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>

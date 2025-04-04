@@ -62,7 +62,7 @@ const CompletedTaskList = () => {
     isError,
     refetch,
   } = useQuery({
-    queryKey: ["task"],
+    queryKey: ["completedtask"],
     queryFn: async () => {
       const response = await axios.get(
         `${Base_Url}/api/panel-fetch-task-completed-list`,

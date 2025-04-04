@@ -34,7 +34,7 @@ const UserReport = () => {
     isLoading: usersLoading,
     isError: usersError,
   } = useQuery({
-    queryKey: ["users"],
+    queryKey: ["fetchusers"],
     queryFn: async () => {
       const response = await axios.get(`${Base_Url}/api/panel-fetch-user`, {
         headers: { Authorization: `Bearer ${token}` },

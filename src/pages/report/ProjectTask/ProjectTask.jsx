@@ -23,7 +23,7 @@ const ProjectTask = () => {
     isLoading: usersLoading,
     isError: usersError,
   } = useQuery({
-    queryKey: ["project"],
+    queryKey: ["fetchproject"],
     queryFn: async () => {
       const response = await axios.get(`${Base_Url}/api/panel-fetch-project`, {
         headers: { Authorization: `Bearer ${token}` },
