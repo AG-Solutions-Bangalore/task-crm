@@ -81,12 +81,12 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
       icon: BookmarkCheck,
       subitems: [
         { name: "Pending Task", path: "/task" },
-        { name: "Hold Task", path: "/task-hold" },
+  
         { name: "Regular Task", path: "/task-regular" },
         { name: "Completed Task", path: "/task-completed" },
 
         ...(storedUserType === 2
-          ? [{ name: "Finished Task", path: "/task-finished" }]
+          ? [      { name: "Hold Task", path: "/task-hold" },{ name: "Finished Task", path: "/task-finished" }]
    
           : []),
       ],

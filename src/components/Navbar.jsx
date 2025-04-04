@@ -53,6 +53,7 @@ const Navbar = ({
   const handleInputChange = (e) => {
     setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
   };
+    const storedUserType = useSelector((state) => state.auth.user_type);
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch((e) => {
@@ -204,9 +205,14 @@ const Navbar = ({
         </div>
         <div className="flex items-center gap-2">
          <div className="hidden sm:block">
-         <CreateProject />
-             <CreateEnquiry  />
-          <CreateTask />
+          {storedUserType == 2 && (
+            <>
+  <CreateProject />
+  <CreateEnquiry  />
+<CreateTask />
+</>
+          )}
+       
          </div>
           <button
             onClick={toggleFullscreen}
